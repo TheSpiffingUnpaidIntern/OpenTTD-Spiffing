@@ -35,7 +35,7 @@
 	                           (ref_type == NR_INDUSTRY && ScriptIndustry::IsValidIndustry(reference)) ||
 	                           (ref_type == NR_TOWN     && ScriptTown::IsValidTown(reference)));
 
-	uint8 c = company;
+	uint16 c = company;
 	if (company == ScriptCompany::COMPANY_INVALID) c = INVALID_COMPANY;
 
 	if (ref_type == NR_NONE) reference = 0;

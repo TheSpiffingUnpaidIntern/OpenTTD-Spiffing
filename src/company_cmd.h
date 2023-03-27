@@ -15,7 +15,7 @@
 #include "livery.h"
 
 enum ClientID : uint32;
-enum Colours : byte;
+enum Colours : uint8;
 
 CommandCost CmdCompanyCtrl(DoCommandFlag flags, CompanyCtrlAction cca, CompanyID company_id, CompanyRemoveReason reason, ClientID client_id);
 CommandCost CmdGiveMoney(DoCommandFlag flags, uint32 money, CompanyID dest_company);

@@ -54,12 +54,17 @@ enum CargoPaymentRatesWidgets {
 /** Widget of the #CompanyLeagueWindow class. */
 enum CompanyLeagueWidgets {
 	WID_CL_BACKGROUND, ///< Background of the window.
+	WID_CLW_SCROLLBAR,
 };
 
 /** Widget of the #PerformanceRatingDetailWindow class. */
 enum PerformanceRatingDetailsWidgets {
+	WID_PRD_COMPANY_NAME,
 	WID_PRD_SCORE_FIRST, ///< First entry in the score list.
 	WID_PRD_SCORE_LAST = WID_PRD_SCORE_FIRST + (SCORE_END - SCORE_BEGIN) - 1, ///< Last entry in the score list.
+
+	WID_PRD_BACKGROUND,
+	WID_PRD_SCROLLBAR,
 
 	WID_PRD_COMPANY_FIRST, ///< First company.
 	WID_PRD_COMPANY_LAST  = WID_PRD_COMPANY_FIRST + MAX_COMPANIES - 1, ///< Last company.

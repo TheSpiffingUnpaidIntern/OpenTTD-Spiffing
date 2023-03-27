@@ -1218,9 +1218,10 @@ DEF_CONSOLE_CMD(ConListGame)
 
 DEF_CONSOLE_CMD(ConStartAI)
 {
-	if (argc == 0 || argc > 3) {
-		IConsolePrint(CC_HELP, "Start a new AI. Usage: 'start_ai [<AI>] [<settings>]'.");
+	if (argc == 0 || argc > 5) {
+		IConsolePrint(CC_HELP, "Start a new AI. Usage: 'start_ai [<AI>] [num <number>] [<settings>]'.");
 		IConsolePrint(CC_HELP, "Start a new AI. If <AI> is given, it starts that specific AI (if found).");
+		IConsolePrint(CC_HELP, "If <number> is given, start <number> copies of the AI.");
 		IConsolePrint(CC_HELP, "If <settings> is given, it is parsed and the AI settings are set to that.");
 		return true;
 	}
@@ -1248,44 +1249,64 @@ DEF_CONSOLE_CMD(ConStartAI)
 		return true;
 	}
 
+	uint32 arg_index = 2;
+	uint32 number = 1;
+
+	if (argc > arg_index + 1 && strcmp(argv[arg_index], "num") == 0) {
+		GetArgumentInteger(&number, argv[arg_index + 1]);
+		arg_index += 2;
+	}
+
 	int n = 0;
-	/* Find the next free slot */
-	for (const Company *c : Company::Iterate()) {
-		if (c->index != n) break;
-		n++;
-	}
-
-	AIConfig *config = AIConfig::GetConfig((CompanyID)n);
-	if (argc >= 2) {
-		config->Change(argv[1], -1, false);
-
-		/* If the name is not found, and there is a dot in the name,
-		 * try again with the assumption everything right of the dot is
-		 * the version the user wants to load. */
-		if (!config->HasScript()) {
-			char *name = stredup(argv[1]);
-			char *e = strrchr(name, '.');
-			if (e != nullptr) {
-				*e = '\0';
-				e++;
-
-				int version = atoi(e);
-				config->Change(name, version, true);
+	for (int i = 0; i < number; i++) {
+		/* Find the next free slot */
+		bool found = false;
+		do {
+			found = false;
+			for (const Company *c : Company::Iterate()) {
+				if (c->index == n) {
+					found = true;
+					break;
+				}
 			}
-			free(name);
+			if (found) {
+				n++;
+			}
+		} while (found);
+
+		AIConfig *config = AIConfig::GetConfig((CompanyID)n);
+		if (argc >= arg_index) {
+			config->Change(argv[1], -1, false);
+
+			/* If the name is not found, and there is a dot in the name,
+			* try again with the assumption everything right of the dot is
+			* the version the user wants to load. */
+			if (!config->HasScript()) {
+				char *name = stredup(argv[1]);
+				char *e = strrchr(name, '.');
+				if (e != nullptr) {
+					*e = '\0';
+					e++;
+
+					int version = atoi(e);
+					config->Change(name, version, true);
+				}
+				free(name);
+			}
+
+			if (!config->HasScript()) {
+				IConsolePrint(CC_ERROR, "Failed to load the specified AI.");
+				return true;
+			}
+			if (argc == arg_index + 1) {
+				config->StringToSettings(argv[arg_index]);
+			}
 		}
 
-		if (!config->HasScript()) {
-			IConsolePrint(CC_ERROR, "Failed to load the specified AI.");
-			return true;
-		}
-		if (argc == 3) {
-			config->StringToSettings(argv[2]);
-		}
+		n++;
+		/* Start a new AI company */
+		Command<CMD_COMPANY_CTRL>::Post(CCA_NEW_AI, INVALID_COMPANY, CRR_NONE, INVALID_CLIENT_ID);
 	}
-
-	/* Start a new AI company */
-	Command<CMD_COMPANY_CTRL>::Post(CCA_NEW_AI, INVALID_COMPANY, CRR_NONE, INVALID_CLIENT_ID);
 
 	return true;
 }
@@ -2522,7 +2543,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("rcon",                    ConRcon,             ConHookNeedNetwork);
 
 	IConsole::CmdRegister("join",                    ConJoinCompany,      ConHookNeedNetwork);
-	IConsole::AliasRegister("spectate",              "join 255");
+	IConsole::AliasRegister("spectate",              "join 767");
 	IConsole::CmdRegister("move",                    ConMoveClient,       ConHookServerOnly);
 	IConsole::CmdRegister("reset_company",           ConResetCompany,     ConHookServerOnly);
 	IConsole::AliasRegister("clean_company",         "reset_company %A");

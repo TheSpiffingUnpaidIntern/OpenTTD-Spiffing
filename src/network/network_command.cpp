@@ -423,7 +423,7 @@ void NetworkDistributeCommands()
  */
 const char *NetworkGameSocketHandler::ReceiveCommand(Packet *p, CommandPacket *cp)
 {
-	cp->company = (CompanyID)p->Recv_uint8();
+	cp->company = (CompanyID)p->Recv_uint16();
 	cp->cmd     = static_cast<Commands>(p->Recv_uint16());
 	if (!IsValidCommand(cp->cmd))               return "invalid command";
 	if (GetCommandFlags(cp->cmd) & CMD_OFFLINE) return "single-player only command";
@@ -445,7 +445,7 @@ const char *NetworkGameSocketHandler::ReceiveCommand(Packet *p, CommandPacket *c
  */
 void NetworkGameSocketHandler::SendCommand(Packet *p, const CommandPacket *cp)
 {
-	p->Send_uint8(cp->company);
+	p->Send_uint16(cp->company);
 	p->Send_uint16(cp->cmd);
 	p->Send_uint16(cp->err_msg);
 	p->Send_uint32(cp->tile);

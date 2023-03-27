@@ -63,7 +63,7 @@
 	InvalidateWindowData(WC_AI_DEBUG, 0, -1);
 	return;
 }
-
+size_t previous_index = 0;
 /* static */ void AI::GameLoop()
 {
 	/* If we are in networking, only servers run this function, and that only if it is allowed */
@@ -74,8 +74,20 @@
 	assert(_settings_game.difficulty.competitor_speed <= 4);
 	if ((AI::frame_counter & ((1 << (4 - _settings_game.difficulty.competitor_speed)) - 1)) != 0) return;
 
+	size_t current_index = 0;
+	size_t batch_index = 0;
+	size_t full_cycle_iters = std::ceil(Company::GetPoolSize()/16.0);
+	if (full_cycle_iters == 0) {
+		full_cycle_iters = 1;
+	}
+	const size_t iterate_per_tick = std::ceil(Company::GetPoolSize()/full_cycle_iters);
+
 	Backup<CompanyID> cur_company(_current_company, FILE_LINE);
 	for (const Company *c : Company::Iterate()) {
+		if (current_index != previous_index) {
+			current_index++;
+			continue;
+		}
 		if (c->is_ai) {
 			PerformanceMeasurer framerate((PerformanceElement)(PFE_AI0 + c->index));
 			cur_company.Change(c->index);
@@ -83,14 +95,24 @@
 		} else {
 			PerformanceMeasurer::SetInactive((PerformanceElement)(PFE_AI0 + c->index));
 		}
+		if (batch_index++ == iterate_per_tick) {
+			break;
+		}
 	}
+	previous_index += batch_index;
 	cur_company.Restore();
+	if (previous_index >= Company::GetPoolSize()) {
+		previous_index = 0;
+	}
 
 	/* Occasionally collect garbage; every 255 ticks do one company.
 	 * Effectively collecting garbage once every two months per AI. */
 	if ((AI::frame_counter & 255) == 0) {
-		CompanyID cid = (CompanyID)GB(AI::frame_counter, 8, 4);
-		if (Company::IsValidAiID(cid)) Company::Get(cid)->ai_instance->CollectGarbage();
+		uint id = GB(AI::frame_counter, 8, 5);
+		for (int i = 0; i < 16; i++) {
+			CompanyID cid = (CompanyID)(id | (i << 5));
+			if (Company::IsValidAiID(cid)) Company::Get(cid)->ai_instance->CollectGarbage();
+		}
 	}
 }
 

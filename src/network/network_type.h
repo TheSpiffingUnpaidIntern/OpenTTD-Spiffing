@@ -11,14 +11,14 @@
 #define NETWORK_TYPE_H
 
 /** How many clients can we have */
-static const uint MAX_CLIENTS = 255;
+static const uint MAX_CLIENTS = 500;
 
 /**
  * The number of slots; must be at least 1 more than MAX_CLIENTS. It must
  * furthermore be less than or equal to 256 as client indices (sent over
  * the network) are 8 bits. It needs 1 more for the dedicated server.
  */
-static const uint MAX_CLIENT_SLOTS = 256;
+static const uint MAX_CLIENT_SLOTS = 501;
 
 /**
  * Vehicletypes in the order they are send in info packets.
@@ -51,7 +51,7 @@ enum ClientID : uint32 {
 };
 
 /** Indices into the client tables */
-typedef uint8 ClientIndex;
+typedef uint16 ClientIndex;
 
 /** Indices into the admin tables. */
 typedef uint8 AdminIndex;

@@ -209,7 +209,6 @@ int GetWidgetFromPos(const Window *w, int x, int y)
 void DrawFrameRect(int left, int top, int right, int bottom, Colours colour, FrameFlags flags)
 {
 	assert(colour < COLOUR_END);
-
 	uint dark         = _colour_gradient[colour][3];
 	uint medium_dark  = _colour_gradient[colour][5];
 	uint medium_light = _colour_gradient[colour][6];
@@ -1835,7 +1834,9 @@ void NWidgetMatrix::GetScrollOffsets(int &start_x, int &start_y, int &base_offs_
 NWidgetBackground::NWidgetBackground(WidgetType tp, Colours colour, int index, NWidgetPIPContainer *child) : NWidgetCore(tp, colour, 1, 1, 0x0, STR_NULL)
 {
 	assert(tp == WWT_PANEL || tp == WWT_INSET || tp == WWT_FRAME);
-	if (index >= 0) this->SetIndex(index);
+	if (index >= 0) {
+		this->SetIndex(index);
+	}
 	this->child = child;
 	this->SetAlignment(SA_TOP | SA_LEFT);
 }
@@ -2318,7 +2319,9 @@ Dimension NWidgetLeaf::dropdown_dimension   = {0, 0};
 NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint32 data, StringID tip) : NWidgetCore(tp, colour, 1, 1, data, tip)
 {
 	assert(index >= 0 || tp == WWT_LABEL || tp == WWT_TEXT || tp == WWT_CAPTION || tp == WWT_RESIZEBOX || tp == WWT_SHADEBOX || tp == WWT_DEFSIZEBOX || tp == WWT_DEBUGBOX || tp == WWT_STICKYBOX || tp == WWT_CLOSEBOX);
-	if (index >= 0) this->SetIndex(index);
+	if (index >= 0) {
+		this->SetIndex(index);
+	}
 	this->min_x = 0;
 	this->min_y = 0;
 	this->SetResize(0, 0);

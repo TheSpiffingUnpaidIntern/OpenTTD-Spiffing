@@ -53,6 +53,7 @@ void VideoDriver_SDL::MakeDirty(int left, int top, int width, int height)
 
 static void UpdatePalette(bool init = false)
 {
+	printf("UpdatePalette");
 	SDL_Color pal[256];
 
 	for (int i = 0; i != _local_palette.count_dirty; i++) {

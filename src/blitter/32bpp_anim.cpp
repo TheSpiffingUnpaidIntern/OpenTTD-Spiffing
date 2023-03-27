@@ -310,7 +310,7 @@ void Blitter_32bppAnim::DrawColourMappingRect(void *dst, int width, int height, 
 	Debug(misc, 0, "32bpp blitter doesn't know how to draw this colour table ('{}')", pal);
 }
 
-void Blitter_32bppAnim::SetPixel(void *video, int x, int y, uint8 colour)
+void Blitter_32bppAnim::SetPixel(void *video, int x, int y, uint16 colour)
 {
 	*((Colour *)video + x + y * _screen.pitch) = LookupColourInPalette(colour);
 
@@ -320,7 +320,7 @@ void Blitter_32bppAnim::SetPixel(void *video, int x, int y, uint8 colour)
 	this->anim_buf[this->ScreenToAnimOffset((uint32 *)video) + x + y * this->anim_buf_pitch] = colour | (DEFAULT_BRIGHTNESS << 8);
 }
 
-void Blitter_32bppAnim::DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint8 colour, int width, int dash)
+void Blitter_32bppAnim::DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint16 colour, int width, int dash)
 {
 	const Colour c = LookupColourInPalette(colour);
 
@@ -338,7 +338,7 @@ void Blitter_32bppAnim::DrawLine(void *video, int x, int y, int x2, int y2, int 
 	}
 }
 
-void Blitter_32bppAnim::DrawRect(void *video, int width, int height, uint8 colour)
+void Blitter_32bppAnim::DrawRect(void *video, int width, int height, uint16 colour)
 {
 	if (_screen_disable_anim) {
 		/* This means our output is not to the screen, so we can't be doing any animation stuff, so use our parent DrawRect() */
@@ -348,7 +348,7 @@ void Blitter_32bppAnim::DrawRect(void *video, int width, int height, uint8 colou
 
 	Colour colour32 = LookupColourInPalette(colour);
 	uint16 *anim_line = this->ScreenToAnimOffset((uint32 *)video) + this->anim_buf;
-
+// 	printf("DrawRect (n/a) %d, %d, %d\n", colour32.r, colour32.g, colour32.b);
 	do {
 		Colour *dst = (Colour *)video;
 		uint16 *anim = anim_line;
@@ -503,7 +503,7 @@ void Blitter_32bppAnim::PaletteAnimate(const Palette &palette)
 	for (int y = this->anim_buf_height; y != 0 ; y--) {
 		for (int x = width; x != 0 ; x--) {
 			uint16 value = *anim;
-			uint8 colour = GB(value, 0, 8);
+			uint16 colour = GB(value, 0, 8);
 			if (colour >= PALETTE_ANIM_START) {
 				/* Update this pixel */
 				*dst = this->AdjustBrightness(LookupColourInPalette(colour), GB(value, 8, 8));

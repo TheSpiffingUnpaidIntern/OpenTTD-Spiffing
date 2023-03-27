@@ -695,7 +695,7 @@ enum WindowClass {
 	 */
 	WC_SCREENSHOT,
 
-	WC_INVALID = 0xFFFF, ///< Invalid window.
+	WC_INVALID = 0xFFFFFFFF, ///< Invalid window.
 };
 
 /** Data value for #Window::OnInvalidateData() of windows with class #WC_GAME_OPTIONS. */
@@ -711,7 +711,7 @@ enum GameOptionsInvalidationData {
 struct Window;
 
 /** Number to differentiate different windows of the same class */
-typedef int32 WindowNumber;
+typedef int64 WindowNumber;
 
 /** State of handling an event. */
 enum EventState {

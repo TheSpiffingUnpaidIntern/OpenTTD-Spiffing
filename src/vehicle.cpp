@@ -214,7 +214,7 @@ bool Vehicle::NeedsServicing() const
 		EngineID new_engine = EngineReplacementForCompany(c, v->engine_type, v->group_id, &replace_when_old);
 
 		/* Check engine availability */
-		if (new_engine == INVALID_ENGINE || !HasBit(Engine::Get(new_engine)->company_avail, v->owner)) continue;
+		if (new_engine == INVALID_ENGINE || !Engine::Get(new_engine)->company_avail.at(v->owner)) continue;
 		/* Is the vehicle old if we are not always replacing? */
 		if (replace_when_old && !v->NeedsAutorenewing(c, false)) continue;
 
@@ -1397,7 +1397,7 @@ void AgeVehicle(Vehicle *v)
 
 	const Company *c = Company::Get(v->owner);
 	/* Don't warn if a renew is active */
-	if (c->settings.engine_renew && v->GetEngine()->company_avail != 0) return;
+	if (c->settings.engine_renew && v->GetEngine()->company_avail.any()) return;
 	/* Don't warn if a replacement is active */
 	if (EngineHasReplacementForCompany(c, v->engine_type, v->group_id)) return;
 
@@ -1858,7 +1858,7 @@ bool CanBuildVehicleInfrastructure(VehicleType type, byte subtype)
 		/* Can we actually build the vehicle type? */
 		for (const Engine *e : Engine::IterateType(type)) {
 			if (type == VEH_ROAD && GetRoadTramType(e->u.road.roadtype) != (RoadTramType)subtype) continue;
-			if (HasBit(e->company_avail, _local_company)) return true;
+			if (e->company_avail.at(_local_company)) return true;
 		}
 		return false;
 	}

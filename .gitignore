@@ -1,5 +1,7 @@
 /.vs
 /build*
+/win_build
+/win_dbg
 CMakeSettings.json
 docs/aidocs/*
 docs/gamedocs/*

@@ -458,7 +458,7 @@ static const SaveLoad _old_station_desc[] = {
 	    SLE_VAR(Station, time_since_load,            SLE_UINT8),
 	    SLE_VAR(Station, time_since_unload,          SLE_UINT8),
 	    SLE_VAR(Station, delete_ctr,                 SLE_UINT8),
-	    SLE_VAR(Station, owner,                      SLE_UINT8),
+	    SLE_VAR(Station, owner,                      SLE_UINT16),
 	    SLE_VAR(Station, facilities,                 SLE_UINT8),
 	    SLE_VAR(Station, airport.type,               SLE_UINT8),
 	SLE_CONDVAR(Station, airport.flags,              SLE_VAR_U64 | SLE_FILE_U16,  SL_MIN_VERSION,  SLV_3),
@@ -529,7 +529,7 @@ public:
 		    SLE_VAR(BaseStation, string_id,              SLE_STRINGID),
 		   SLE_SSTR(BaseStation, name,                   SLE_STR | SLF_ALLOW_CONTROL),
 		    SLE_VAR(BaseStation, delete_ctr,             SLE_UINT8),
-		    SLE_VAR(BaseStation, owner,                  SLE_UINT8),
+		    SLE_VAR(BaseStation, owner,                  SLE_UINT16),
 		    SLE_VAR(BaseStation, facilities,             SLE_UINT8),
 		    SLE_VAR(BaseStation, build_date,             SLE_INT32),
 

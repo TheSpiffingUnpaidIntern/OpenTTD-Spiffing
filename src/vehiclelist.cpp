@@ -15,30 +15,29 @@
 #include "safeguards.h"
 
 /**
- * Pack a VehicleListIdentifier in a single uint32.
+ * Pack a VehicleListIdentifier in a single uint64.
  * @return The packed identifier.
  */
-uint32 VehicleListIdentifier::Pack() const
+uint64 VehicleListIdentifier::Pack() const
 {
-	byte c = this->company == OWNER_NONE ? 0xF : (byte)this->company;
-	assert(c             < (1 <<  4));
+	uint16 c = this->company;
 	assert(this->vtype   < (1 <<  2));
 	assert(this->index   < (1 << 20));
 	assert(this->type    < VLT_END);
 	static_assert(VLT_END <= (1 <<  3));
 
-	return c << 28 | this->type << 23 | this->vtype << 26 | this->index;
+	return (uint64)c << 28 | (uint64)this->type << 23 | (uint64)this->vtype << 26 | (uint64)this->index;
 }
 
 /**
- * Unpack a VehicleListIdentifier from a single uint32.
+ * Unpack a VehicleListIdentifier from a single uint64.
  * @param data The data to unpack.
  * @return true iff the data was valid (enough).
  */
-bool VehicleListIdentifier::UnpackIfValid(uint32 data)
+bool VehicleListIdentifier::UnpackIfValid(uint64 data)
 {
-	byte c        = GB(data, 28, 4);
-	this->company = c == 0xF ? OWNER_NONE : (CompanyID)c;
+	uint16 c      = GB(data, 28, 8);
+	this->company = (CompanyID)c;
 	this->type    = (VehicleListType)GB(data, 23, 3);
 	this->vtype   = (VehicleType)GB(data, 26, 2);
 	this->index   = GB(data, 0, 20);

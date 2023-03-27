@@ -21,9 +21,9 @@
 
 static const SaveLoad _engine_desc[] = {
 	 SLE_CONDVAR(Engine, intro_date,          SLE_FILE_U16 | SLE_VAR_I32,  SL_MIN_VERSION,  SLV_31),
-	 SLE_CONDVAR(Engine, intro_date,          SLE_INT32,                  SLV_31, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, intro_date,          SLE_INT32,                   SLV_31, SL_MAX_VERSION),
 	 SLE_CONDVAR(Engine, age,                 SLE_FILE_U16 | SLE_VAR_I32,  SL_MIN_VERSION,  SLV_31),
-	 SLE_CONDVAR(Engine, age,                 SLE_INT32,                  SLV_31, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, age,                 SLE_INT32,                   SLV_31, SL_MAX_VERSION),
 	     SLE_VAR(Engine, reliability,         SLE_UINT16),
 	     SLE_VAR(Engine, reliability_spd_dec, SLE_UINT16),
 	     SLE_VAR(Engine, reliability_start,   SLE_UINT16),
@@ -33,13 +33,17 @@ static const SaveLoad _engine_desc[] = {
 	     SLE_VAR(Engine, duration_phase_2,    SLE_UINT16),
 	     SLE_VAR(Engine, duration_phase_3,    SLE_UINT16),
 	     SLE_VAR(Engine, flags,               SLE_UINT8),
-	 SLE_CONDVAR(Engine, preview_asked,       SLE_UINT16,                SLV_179, SL_MAX_VERSION),
-	 SLE_CONDVAR(Engine, preview_company,     SLE_UINT8,                 SLV_179, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, preview_asked,       SLE_FILE_U16 | SLE_VAR_U64,  SLV_179, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	 SLE_CONDARR(Engine, preview_asked.data,  SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, preview_company,     SLE_FILE_U8 | SLE_VAR_U16,   SLV_179, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	 SLE_CONDVAR(Engine, preview_company,     SLE_UINT16,                  SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	     SLE_VAR(Engine, preview_wait,        SLE_UINT8),
-	 SLE_CONDVAR(Engine, company_avail,       SLE_FILE_U8  | SLE_VAR_U16,  SL_MIN_VERSION, SLV_104),
-	 SLE_CONDVAR(Engine, company_avail,       SLE_UINT16,                SLV_104, SL_MAX_VERSION),
-	 SLE_CONDVAR(Engine, company_hidden,      SLE_UINT16,                SLV_193, SL_MAX_VERSION),
-	SLE_CONDSSTR(Engine, name,                SLE_STR,                    SLV_84, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, company_avail.data[0],       SLE_FILE_U8 | SLE_VAR_U64,   SL_MIN_VERSION, SLV_104),
+	 SLE_CONDVAR(Engine, company_avail.data[0],       SLE_FILE_U16 | SLE_VAR_U64,   SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	 SLE_CONDARR(Engine, company_avail.data,  SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
+	 SLE_CONDVAR(Engine, company_hidden.data[0],      SLE_FILE_U16| SLE_VAR_U64,   SLV_193, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	 SLE_CONDARR(Engine, company_hidden.data, SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
+	SLE_CONDSSTR(Engine, name,                SLE_STR,                     SLV_84, SL_MAX_VERSION),
 };
 
 static std::vector<Engine*> _temp_engine;
@@ -104,13 +108,12 @@ struct ENGNChunkHandler : ChunkHandler {
 		while ((index = SlIterateArray()) != -1) {
 			Engine *e = GetTempDataEngine(index);
 			SlObject(e, slt);
-
 			if (IsSavegameVersionBefore(SLV_179)) {
 				/* preview_company_rank was replaced with preview_company and preview_asked.
 				 * Just cancel any previews. */
 				e->flags &= ~4; // ENGINE_OFFER_WINDOW_OPEN
 				e->preview_company = INVALID_COMPANY;
-				e->preview_asked = (CompanyMask)-1;
+				e->preview_asked.set();
 			}
 		}
 	}

@@ -356,6 +356,7 @@ typedef unsigned char byte;
 #endif
 
 /* Check if the types have the bitsizes like we are using them */
+
 static_assert(sizeof(uint64) == 8);
 static_assert(sizeof(uint32) == 4);
 static_assert(sizeof(uint16) == 2);

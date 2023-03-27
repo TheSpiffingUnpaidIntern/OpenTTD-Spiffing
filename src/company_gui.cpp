@@ -640,12 +640,12 @@ private:
 		bool primary = widget == WID_SCL_PRI_COL_DROPDOWN;
 		byte default_col;
 
-		/* Disallow other company colours for the primary colour */
-		if (this->livery_class < LC_GROUP_RAIL && HasBit(this->sel, LS_DEFAULT) && primary) {
-			for (const Company *c : Company::Iterate()) {
-				if (c->index != _local_company) SetBit(used_colours, c->colour);
-			}
-		}
+// 		/* Disallow other company colours for the primary colour */
+// 		if (this->livery_class < LC_GROUP_RAIL && HasBit(this->sel, LS_DEFAULT) && primary) {
+// 			for (const Company *c : Company::Iterate()) {
+// 				if (c->index != _local_company) SetBit(used_colours, c->colour);
+// 			}
+// 		}
 
 		c = Company::Get((CompanyID)this->window_number);
 
@@ -1199,7 +1199,8 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, int colour, int x, int y)
 	}
 
 	/* Draw the gradient (background) */
-	DrawSprite(SPR_GRADIENT, GENERAL_SPRITE_COLOUR(colour), x, y);
+// 	printf("%d, %d\n", colour, GENERAL_SPRITE_COLOUR(colour));
+	DrawSprite(SPR_GRADIENT, GENERAL_SPRITE_COLOUR(colour%16), x, y);
 
 	for (CompanyManagerFaceVariable cmfv = CMFV_CHEEKS; cmfv < CMFV_END; cmfv++) {
 		switch (cmfv) {

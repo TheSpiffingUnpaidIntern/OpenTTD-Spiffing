@@ -193,7 +193,7 @@ RoadTypes GetCompanyRoadTypes(CompanyID company, bool introduces)
 		const EngineInfo *ei = &e->info;
 
 		if (HasBit(ei->climates, _settings_game.game_creation.landscape) &&
-				(HasBit(e->company_avail, company) || _date >= e->intro_date + DAYS_IN_YEAR)) {
+				(e->company_avail.at(company) || _date >= e->intro_date + DAYS_IN_YEAR)) {
 			const RoadVehicleInfo *rvi = &e->u.road;
 			assert(rvi->roadtype < ROADTYPE_END);
 			if (introduces) {
@@ -285,7 +285,7 @@ RoadTypes ExistingRoadTypes(CompanyID c)
 		if (!HasBit(e->info.climates, _settings_game.game_creation.landscape)) continue;
 
 		/* Check whether available for all potential companies */
-		if (e->company_avail != (CompanyMask)-1) continue;
+		if (!e->company_avail.all()) continue;
 
 		known_roadtypes |= GetRoadTypeInfo(e->u.road.roadtype)->introduces_roadtypes;
 	}

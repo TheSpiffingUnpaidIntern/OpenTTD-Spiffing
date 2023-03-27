@@ -520,7 +520,7 @@ OpenGLBackend::~OpenGLBackend()
 		_glDeleteTextures(1, &this->pal_texture);
 	}
 }
-
+#include <signal.h>
 /**
  * Check for the needed OpenGL functionality and allocate all resources.
  * @param screen_res Current display resolution.
@@ -1031,8 +1031,7 @@ bool OpenGLBackend::Resize(int w, int h, bool force)
  */
 void OpenGLBackend::UpdatePalette(const Colour *pal, uint first, uint length)
 {
-	assert(first + length <= 256);
-
+	assert(first + length <= 1000);
 	_glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	_glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	_glActiveTexture(GL_TEXTURE1);

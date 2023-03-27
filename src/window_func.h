@@ -49,7 +49,7 @@ void ShowVitalWindows();
  */
 void ReInitAllWindows(bool zoom_changed);
 
-void SetWindowWidgetDirty(WindowClass cls, WindowNumber number, byte widget_index);
+void SetWindowWidgetDirty(WindowClass cls, WindowNumber number, uint16 widget_index);
 void SetWindowDirty(WindowClass cls, WindowNumber number);
 void SetWindowClassesDirty(WindowClass cls);
 

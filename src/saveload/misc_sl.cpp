@@ -81,7 +81,7 @@ static const SaveLoad _date_desc[] = {
 	    SLEG_VAR("next_disaster_start",         _disaster_delay,         SLE_UINT16),
 	    SLEG_VAR("random_state[0]",        _random.state[0],        SLE_UINT32),
 	    SLEG_VAR("random_state[1]",        _random.state[1],        SLE_UINT32),
-	    SLEG_VAR("company_tick_counter", _cur_company_tick_index, SLE_FILE_U8  | SLE_VAR_U32),
+	    SLEG_VAR("company_tick_counter", _cur_company_tick_index, SLE_FILE_U16  | SLE_VAR_U32),
 	SLEG_CONDVAR("next_competitor_start",  _next_competitor_start,  SLE_FILE_U16 | SLE_VAR_U32,  SL_MIN_VERSION, SLV_109),
 	SLEG_CONDVAR("next_competitor_start",  _next_competitor_start,  SLE_UINT32,                SLV_109, SL_MAX_VERSION),
 	    SLEG_VAR("trees_tick_counter",     _trees_tick_ctr,         SLE_UINT8),

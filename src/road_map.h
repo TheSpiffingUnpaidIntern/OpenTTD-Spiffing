@@ -234,11 +234,17 @@ static inline bool HasTileAnyRoadType(TileIndex t, RoadTypes rts)
 static inline Owner GetRoadOwner(TileIndex t, RoadTramType rtt)
 {
 	assert(MayHaveRoad(t));
-	if (rtt == RTT_ROAD) return (Owner)GB(IsNormalRoadTile(t) ? _m[t].m1 : _me[t].m7, 0, 5);
+	if (rtt == RTT_ROAD) {
+		if (IsNormalRoadTile(t)) {
+			return GetTileOwner(t);
+		} else {
+			return (Owner)(GB(_me[t].m7, 0, 5) | ((uint16_t)_me[t].m9&0xe0) | (((uint16_t)_me[t].m10&0x03)<<8));
+		}
+	}
 
 	/* Trams don't need OWNER_TOWN, and remapping OWNER_NONE
 	 * to OWNER_TOWN makes it use one bit less */
-	Owner o = (Owner)GB(_m[t].m3, 4, 4);
+	Owner o = (Owner)(GB(_m[t].m3, 4, 4) | (((uint16_t)_me[t].m10&0xFC)<<3));
 	return o == OWNER_TOWN ? OWNER_NONE : o;
 }
 
@@ -251,9 +257,22 @@ static inline Owner GetRoadOwner(TileIndex t, RoadTramType rtt)
 static inline void SetRoadOwner(TileIndex t, RoadTramType rtt, Owner o)
 {
 	if (rtt == RTT_ROAD) {
-		SB(IsNormalRoadTile(t) ? _m[t].m1 : _me[t].m7, 0, 5, o);
+		if (IsNormalRoadTile(t)) {
+			SetTileOwner(t, o);
+		} else {
+			SB(_me[t].m7, 0, 5, o);
+			uint8 owner_add = ((o&0x3FF)>>5);
+			_me[t].m9 &= ~(0xe0);
+			_me[t].m9 |= (owner_add&0x1f)<<5;
+			_me[t].m10 &= ~(0x03);
+			_me[t].m10 |= (owner_add&0x1f)>>3;
+
+		}
 	} else {
-		SB(_m[t].m3, 4, 4, o == OWNER_NONE ? OWNER_TOWN : o);
+		SB(_m[t].m3, 4, 4, o == OWNER_NONE ? OLD_OWNER_TOWN : o);
+		uint8 owner_add = ((o&0x3FF)>>5);
+		_me[t].m10 &= ~(0xFC);
+		_me[t].m10 |= (owner_add&0x1f)<<2;
 	}
 }
 

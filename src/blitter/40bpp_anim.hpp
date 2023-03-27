@@ -21,9 +21,9 @@ class Blitter_40bppAnim : public Blitter_32bppOptimized {
 public:
 
 	// void *MoveTo(void *video, int x, int y) override;
-	void SetPixel(void *video, int x, int y, uint8 colour) override;
-	void DrawRect(void *video, int width, int height, uint8 colour) override;
-	void DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint8 colour, int width, int dash) override;
+	void SetPixel(void *video, int x, int y, uint16 colour) override;
+	void DrawRect(void *video, int width, int height, uint16 colour) override;
+	void DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint16 colour, int width, int dash) override;
 	void CopyFromBuffer(void *video, const void *src, int width, int height) override;
 	void CopyToBuffer(const void *video, void *dst, int width, int height) override;
 	void CopyImageToBuffer(const void *video, void *dst, int width, int height, int dst_pitch) override;

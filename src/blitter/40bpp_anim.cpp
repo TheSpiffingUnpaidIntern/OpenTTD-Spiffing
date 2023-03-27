@@ -28,7 +28,7 @@ static FBlitter_40bppAnim iFBlitter_40bppAnim;
 static const Colour _black_colour(0, 0, 0);
 
 
-void Blitter_40bppAnim::SetPixel(void *video, int x, int y, uint8 colour)
+void Blitter_40bppAnim::SetPixel(void *video, int x, int y, uint16 colour)
 {
 	if (_screen_disable_anim) {
 		Blitter_32bppOptimized::SetPixel(video, x, y, colour);
@@ -39,7 +39,7 @@ void Blitter_40bppAnim::SetPixel(void *video, int x, int y, uint8 colour)
 	}
 }
 
-void Blitter_40bppAnim::DrawRect(void *video, int width, int height, uint8 colour)
+void Blitter_40bppAnim::DrawRect(void *video, int width, int height, uint16 colour)
 {
 	if (_screen_disable_anim) {
 		/* This means our output is not to the screen, so we can't be doing any animation stuff, so use our parent DrawRect() */
@@ -56,7 +56,7 @@ void Blitter_40bppAnim::DrawRect(void *video, int width, int height, uint8 colou
 
 		for (int i = width; i > 0; i--) {
 			*dst = _black_colour;
-			*anim = colour;
+			*anim = colour&0xff;
 			dst++;
 			anim++;
 		}
@@ -65,7 +65,7 @@ void Blitter_40bppAnim::DrawRect(void *video, int width, int height, uint8 colou
 	} while (--height);
 }
 
-void Blitter_40bppAnim::DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint8 colour, int width, int dash)
+void Blitter_40bppAnim::DrawLine(void *video, int x, int y, int x2, int y2, int screen_width, int screen_height, uint16 colour, int width, int dash)
 {
 	if (_screen_disable_anim) {
 		/* This means our output is not to the screen, so we can't be doing any animation stuff, so use our parent DrawRect() */

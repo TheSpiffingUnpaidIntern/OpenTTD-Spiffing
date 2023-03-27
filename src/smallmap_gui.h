@@ -29,7 +29,7 @@ void BuildOwnerLegend();
 
 /** Structure for holding relevant data for legends in small map */
 struct LegendAndColour {
-	uint8 colour;              ///< Colour of the item on the map.
+	uint16 colour;              ///< Colour of the item on the map.
 	StringID legend;           ///< String corresponding to the coloured item.
 	IndustryType type;         ///< Type of industry. Only valid for industry entries.
 	uint8 height;              ///< Height in tiles. Only valid for height legend entries.
@@ -142,9 +142,11 @@ protected:
 	 * the _local_company. Spectators get to see all companies' links.
 	 * @return Company mask.
 	 */
-	inline uint32 GetOverlayCompanyMask() const
+	inline CompanyMask GetOverlayCompanyMask() const
 	{
-		return Company::IsValidID(_local_company) ? 1U << _local_company : 0xffffffff;
+		CompanyMask mask;
+		Company::IsValidID(_local_company) ? mask.set(_local_company) : mask.set();
+		return mask;
 	}
 
 	void RebuildColourIndexIfNecessary();

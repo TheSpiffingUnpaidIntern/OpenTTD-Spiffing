@@ -109,7 +109,7 @@ const SaveLoadCompat _company_sl_compat[] = {
 	SLC_VAR("share_owners"),
 	SLC_VAR("num_valid_stat_ent"),
 	SLC_VAR("months_of_bankruptcy"),
-	SLC_VAR("bankrupt_asked"),
+	SLC_VAR("bankrupt_asked.data[0]"),
 	SLC_VAR("bankrupt_timeout"),
 	SLC_VAR("bankrupt_value"),
 	SLC_VAR("yearly_expenses"),

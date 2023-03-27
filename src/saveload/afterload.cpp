@@ -153,7 +153,8 @@ static void ConvertTownOwner()
 		switch (GetTileType(tile)) {
 			case MP_ROAD:
 				if (GB(_m[tile].m5, 4, 2) == ROAD_TILE_CROSSING && HasBit(_m[tile].m3, 7)) {
-					_m[tile].m3 = OWNER_TOWN;
+					_m[tile].m3 = OWNER_TOWN&0xff;
+					_me[tile].m6 = (OWNER_TOWN&0xff00 >> 8);
 				}
 				FALLTHROUGH;
 
@@ -899,7 +900,11 @@ bool AfterLoadGame()
 				BaseStation *bst = BaseStation::GetByTile(t);
 
 				/* Sanity check */
-				if (!IsBuoy(t) && bst->owner != GetTileOwner(t)) SlErrorCorrupt("Wrong owner for station tile");
+// 				printf("bst->owner %04X, tile owner %04X (tile: %u)\n", bst->owner, GetTileOwner(t), uint32(t));
+				if (!IsBuoy(t) && bst->owner != GetTileOwner(t)) {
+					printf("Wrong owner for station tile\n");
+					SlErrorCorrupt("Wrong owner for station tile");
+				}
 
 				/* Set up station spread */
 				bst->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
@@ -972,7 +977,9 @@ bool AfterLoadGame()
 
 				case MP_ROAD:
 					_m[t].m4 |= (_m[t].m2 << 4);
-					if ((GB(_m[t].m5, 4, 2) == ROAD_TILE_CROSSING ? (Owner)_m[t].m3 : GetTileOwner(t)) == OWNER_TOWN) {
+					if ((GB(_m[t].m5, 4, 2) == ROAD_TILE_CROSSING ?
+						(Owner)(_m[t].m3 + _me[t].m6 * 256)
+						: GetTileOwner(t)) == OWNER_TOWN) {
 						SetTownIndex(t, CalcClosestTownFromTile(t)->index);
 					} else {
 						SetTownIndex(t, 0);
@@ -2019,15 +2026,15 @@ bool AfterLoadGame()
 
 		/* More companies ... */
 		for (Company *c : Company::Iterate()) {
-			if (c->bankrupt_asked == 0xFF) c->bankrupt_asked = 0xFFFF;
+			if (c->bankrupt_asked.data[0] == 0x00000000000000FF) c->bankrupt_asked.set();
 		}
 
 		for (Engine *e : Engine::Iterate()) {
-			if (e->company_avail == 0xFF) e->company_avail = 0xFFFF;
+			if (e->company_avail.data[0] == 0x00000000000000FF) e->company_avail.set();
 		}
 
 		for (Town *t : Town::Iterate()) {
-			if (t->have_ratings == 0xFF) t->have_ratings = 0xFFFF;
+			if (t->have_ratings.data[0] == 0x00000000000000FF) t->have_ratings.set();
 			for (uint i = 8; i != MAX_COMPANIES; i++) t->ratings[i] = RATING_INITIAL;
 		}
 	}

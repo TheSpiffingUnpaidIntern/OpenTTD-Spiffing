@@ -77,8 +77,8 @@
 		case 0xAB: return GB(this->t->ratings[6], 8, 8);
 		case 0xAC: return this->t->ratings[7];
 		case 0xAD: return GB(this->t->ratings[7], 8, 8);
-		case 0xAE: return this->t->have_ratings;
-		case 0xB2: return this->t->statues;
+		case 0xAE: return (uint32)this->t->have_ratings.data[0];
+		case 0xB2: return (uint32)this->t->statues.data[0];
 		case 0xB6: return ClampToU16(this->t->cache.num_houses);
 		case 0xB9: return this->t->growth_rate / TOWN_GROWTH_TICKS;
 		case 0xBA: return ClampToU16(this->t->supplied[CT_PASSENGERS].new_max);

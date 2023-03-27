@@ -20,7 +20,7 @@ static const SaveLoad _subsidies_desc[] = {
 	    SLE_VAR(Subsidy, cargo_type, SLE_UINT8),
 	SLE_CONDVAR(Subsidy, remaining,  SLE_FILE_U8 | SLE_VAR_U16, SL_MIN_VERSION, SLV_CUSTOM_SUBSIDY_DURATION),
 	SLE_CONDVAR(Subsidy, remaining,  SLE_UINT16,                SLV_CUSTOM_SUBSIDY_DURATION, SL_MAX_VERSION),
-	SLE_CONDVAR(Subsidy, awarded,    SLE_UINT8,                                     SLV_125, SL_MAX_VERSION),
+	SLE_CONDVAR(Subsidy, awarded,    SLE_UINT16,                                     SLV_125, SL_MAX_VERSION),
 	SLE_CONDVAR(Subsidy, src_type,   SLE_UINT8,                                     SLV_125, SL_MAX_VERSION),
 	SLE_CONDVAR(Subsidy, dst_type,   SLE_UINT8,                                     SLV_125, SL_MAX_VERSION),
 	SLE_CONDVAR(Subsidy, src,        SLE_FILE_U8 | SLE_VAR_U16,                       SL_MIN_VERSION, SLV_5),

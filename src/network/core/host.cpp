@@ -43,37 +43,53 @@ static void NetworkFindBroadcastIPsInternal(NetworkAddressList *broadcast) // Wi
 {
 	SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock == INVALID_SOCKET) return;
-
+	printf("%lu\n", __LINE__);
 	DWORD len = 0;
 	int num = 2;
 	INTERFACE_INFO *ifo = CallocT<INTERFACE_INFO>(num);
+	printf("%lu\n", __LINE__);
 
 	for (;;) {
 		if (WSAIoctl(sock, SIO_GET_INTERFACE_LIST, nullptr, 0, ifo, num * sizeof(*ifo), &len, nullptr, nullptr) == 0) break;
+	printf("%lu\n", __LINE__);
 		free(ifo);
 		if (WSAGetLastError() != WSAEFAULT) {
 			closesocket(sock);
 			return;
 		}
+	printf("%lu\n", __LINE__);
 		num *= 2;
 		ifo = CallocT<INTERFACE_INFO>(num);
+	printf("%lu\n", __LINE__);
 	}
 
+	printf("%lu\n", __LINE__);
 	for (uint j = 0; j < len / sizeof(*ifo); j++) {
+	printf("%lu\n", __LINE__);
 		if (ifo[j].iiFlags & IFF_LOOPBACK) continue;
+	printf("%lu\n", __LINE__);
 		if (!(ifo[j].iiFlags & IFF_BROADCAST)) continue;
+	printf("%lu\n", __LINE__);
 
 		sockaddr_storage address;
 		memset(&address, 0, sizeof(address));
+	printf("%lu\n", __LINE__);
 		/* iiBroadcast is unusable, because it always seems to be set to 255.255.255.255. */
 		memcpy(&address, &ifo[j].iiAddress.Address, sizeof(sockaddr));
+	printf("%lu\n", __LINE__);
 		((sockaddr_in*)&address)->sin_addr.s_addr = ifo[j].iiAddress.AddressIn.sin_addr.s_addr | ~ifo[j].iiNetmask.AddressIn.sin_addr.s_addr;
+	printf("%lu\n", __LINE__);
 		NetworkAddress addr(address, sizeof(sockaddr));
+	printf("%lu\n", __LINE__);
 		if (std::none_of(broadcast->begin(), broadcast->end(), [&addr](NetworkAddress const& elem) -> bool { return elem == addr; })) broadcast->push_back(addr);
+	printf("%lu\n", __LINE__);
 	}
 
+	printf("%lu\n", __LINE__);
 	free(ifo);
+	printf("%lu\n", __LINE__);
 	closesocket(sock);
+	printf("%lu\n", __LINE__);
 }
 
 #else /* not HAVE_GETIFADDRS */

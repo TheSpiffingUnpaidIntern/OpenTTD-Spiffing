@@ -329,7 +329,7 @@ CommandCost CheckOwnership(Owner owner, TileIndex tile)
 CommandCost CheckTileOwnership(TileIndex tile)
 {
 	Owner owner = GetTileOwner(tile);
-
+// 	printf("Owner %u %u\n", owner, OWNER_END);
 	assert(owner < OWNER_END);
 
 	if (owner == _current_company) return CommandCost();
@@ -472,7 +472,8 @@ static Colours GenerateCompanyColour()
 		if (colours[i] != INVALID_COLOUR) return colours[i];
 	}
 
-	NOT_REACHED();
+// 	NOT_REACHED();
+	return (Colours)(Random() & 0xF);
 }
 
 /**
@@ -658,7 +659,7 @@ static void HandleBankruptcyTakeover(Company *c)
 	 * Note that the company going bankrupt can't buy itself. */
 	static const int TAKE_OVER_TIMEOUT = 3 * 30 * DAY_TICKS / (MAX_COMPANIES - 1);
 
-	assert(c->bankrupt_asked != 0);
+	assert(c->bankrupt_asked.any());
 
 	/* We're currently asking some company to buy 'us' */
 	if (c->bankrupt_timeout != 0) {
@@ -670,15 +671,15 @@ static void HandleBankruptcyTakeover(Company *c)
 	}
 
 	/* Did we ask everyone for bankruptcy? If so, bail out. */
-	if (c->bankrupt_asked == MAX_UVALUE(CompanyMask)) return;
+	if (c->bankrupt_asked.all()) return;
 
 	Company *best = nullptr;
 	int32 best_performance = -1;
 
 	/* Ask the company with the highest performance history first */
 	for (Company *c2 : Company::Iterate()) {
-		if (c2->bankrupt_asked == 0 && // Don't ask companies going bankrupt themselves
-				!HasBit(c->bankrupt_asked, c2->index) &&
+		if (c2->bankrupt_asked.none() && // Don't ask companies going bankrupt themselves
+				!c->bankrupt_asked.at(c2->index) &&
 				best_performance < c2->old_economy[1].performance_history &&
 				MayCompanyTakeOver(c2->index, c->index)) {
 			best_performance = c2->old_economy[1].performance_history;
@@ -688,11 +689,11 @@ static void HandleBankruptcyTakeover(Company *c)
 
 	/* Asked all companies? */
 	if (best_performance == -1) {
-		c->bankrupt_asked = MAX_UVALUE(CompanyMask);
+		c->bankrupt_asked.set();
 		return;
 	}
 
-	SetBit(c->bankrupt_asked, best->index);
+	c->bankrupt_asked.set(best->index, true);
 
 	c->bankrupt_timeout = TAKE_OVER_TIMEOUT;
 	if (best->is_ai) {
@@ -710,7 +711,7 @@ void OnTick_Companies()
 	Company *c = Company::GetIfValid(_cur_company_tick_index);
 	if (c != nullptr) {
 		if (c->name_1 != 0) GenerateCompanyName(c);
-		if (c->bankrupt_asked != 0) HandleBankruptcyTakeover(c);
+		if (c->bankrupt_asked.any()) HandleBankruptcyTakeover(c);
 	}
 
 	if (_next_competitor_start == 0) {

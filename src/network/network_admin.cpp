@@ -244,7 +244,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientInfo(const NetworkC
 	p->Send_string(ci->client_name);
 	p->Send_uint8 (0); // Used to be language
 	p->Send_uint32(ci->join_date);
-	p->Send_uint8 (ci->client_playas);
+	p->Send_uint16(ci->client_playas);
 
 	this->SendPacket(p);
 
@@ -262,7 +262,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientUpdate(const Networ
 
 	p->Send_uint32(ci->client_id);
 	p->Send_string(ci->client_name);
-	p->Send_uint8 (ci->client_playas);
+	p->Send_uint16(ci->client_playas);
 
 	this->SendPacket(p);
 
@@ -306,7 +306,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientError(ClientID clie
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyNew(CompanyID company_id)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_NEW);
-	p->Send_uint8(company_id);
+	p->Send_uint16(company_id);
 
 	this->SendPacket(p);
 
@@ -321,7 +321,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyInfo(const Company
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_INFO);
 
-	p->Send_uint8 (c->index);
+	p->Send_uint16(c->index);
 	SetDParam(0, c->index);
 	p->Send_string(GetString(STR_COMPANY_NAME));
 	SetDParam(0, c->index);
@@ -333,7 +333,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyInfo(const Company
 	p->Send_uint8 (CeilDiv(c->months_of_bankruptcy, 3)); // send as quarters_of_bankruptcy
 
 	for (auto owner : c->share_owners) {
-		p->Send_uint8(owner);
+		p->Send_uint16(owner);
 	}
 
 	this->SendPacket(p);
@@ -350,7 +350,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyUpdate(const Compa
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_UPDATE);
 
-	p->Send_uint8 (c->index);
+	p->Send_uint16(c->index);
 	SetDParam(0, c->index);
 	p->Send_string(GetString(STR_COMPANY_NAME));
 	SetDParam(0, c->index);
@@ -360,7 +360,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyUpdate(const Compa
 	p->Send_uint8 (CeilDiv(c->months_of_bankruptcy, 3)); // send as quarters_of_bankruptcy
 
 	for (auto owner : c->share_owners) {
-		p->Send_uint8(owner);
+		p->Send_uint16(owner);
 	}
 
 	this->SendPacket(p);
@@ -377,7 +377,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyRemove(CompanyID c
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_REMOVE);
 
-	p->Send_uint8(company_id);
+	p->Send_uint16(company_id);
 	p->Send_uint8(acrr);
 
 	this->SendPacket(p);
@@ -397,7 +397,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyEconomy()
 
 		Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_ECONOMY);
 
-		p->Send_uint8(company->index);
+		p->Send_uint16(company->index);
 
 		/* Current information. */
 		p->Send_uint64(company->money);
@@ -431,7 +431,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyStats()
 		Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_STATS);
 
 		/* Send the information. */
-		p->Send_uint8(company->index);
+		p->Send_uint16(company->index);
 
 		for (uint i = 0; i < NETWORK_VEH_END; i++) {
 			p->Send_uint16(company_stats[company->index].num_vehicle[i]);
@@ -628,7 +628,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCmdLogging(ClientID clien
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CMD_LOGGING);
 
 	p->Send_uint32(client_id);
-	p->Send_uint8 (cp->company);
+	p->Send_uint16(cp->company);
 	p->Send_uint16(cp->cmd);
 	p->Send_buffer(cp->data);
 	p->Send_uint32(cp->frame);

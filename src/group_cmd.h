@@ -14,7 +14,7 @@
 #include "group_type.h"
 #include "vehicle_type.h"
 
-enum Colours : byte;
+enum Colours : uint8;
 enum GroupFlags : uint8;
 
 /** Action for \c CmdAlterGroup. */

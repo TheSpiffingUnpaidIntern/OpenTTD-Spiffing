@@ -224,7 +224,8 @@ struct MainWindow : Window
 		NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(WID_M_VIEWPORT);
 		nvp->InitializeViewport(this, TileXY(32, 32), ZOOM_LVL_VIEWPORT);
 
-		this->viewport->overlay = new LinkGraphOverlay(this, WID_M_VIEWPORT, 0, 0, 3);
+		CompanyMask empty;
+		this->viewport->overlay = new LinkGraphOverlay(this, WID_M_VIEWPORT, 0, empty, 3);
 		this->refresh.SetInterval(LINKGRAPH_DELAY);
 	}
 
@@ -235,7 +236,7 @@ struct MainWindow : Window
 		this->refresh.SetInterval(LINKGRAPH_REFRESH_PERIOD);
 
 		if (this->viewport->overlay->GetCargoMask() == 0 ||
-				this->viewport->overlay->GetCompanyMask() == 0) {
+				this->viewport->overlay->GetCompanyMask().none()) {
 			return;
 		}
 

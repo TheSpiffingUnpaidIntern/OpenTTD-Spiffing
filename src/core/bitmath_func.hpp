@@ -319,6 +319,178 @@ static inline T ROR(const T x, const uint8 n)
 	if (n == 0) return x;
 	return (T)(x >> n | x << (sizeof(x) * 8 - n));
 }
+template <int esize>
+class Bitset
+{
+public:
+	static const int bsize = esize / 64 + (esize % 64 ? 1 : 0);
+	static const int msize = bsize * 8;
+
+	uint64 data[bsize];
+
+	Bitset()
+	{
+		reset();
+	}
+
+	uint which_byte(uint n) const
+	{
+		for (uint b = 0; b < bsize; b++) {
+			if (n < (b + 1) * 64) {
+				return b;
+			}
+		}
+		return (uint)-1;
+	}
+
+	void set(uint n, bool v)
+	{
+		uint b = which_byte(n);
+		if (b >= bsize) {
+			return;
+		}
+		int bit = n % 64;
+		data[b] = (data[b] & ~((uint64)1 << bit)) | ((uint64)v << bit);
+	}
+
+	bool at(uint n) const
+	{
+		uint b= which_byte(n);
+		if (b >= bsize) {
+			return false;
+		}
+		return (data[b] & ((uint64)1 << (n % 64))) != 0;
+	}
+
+	bool all() const
+	{
+		uint b;
+		for (b = 0; b < esize / 64; b++) {
+			if (data[b] != (uint64)-1) {
+				return false;
+			}
+		}
+		if (esize % 64) {
+			uint64 bitmask = ~((uint64)-1 << (esize % 64));
+			if ((data[b] & bitmask) != bitmask) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool none() const
+	{
+		uint b;
+		for (b = 0; b < esize / 64; b++) {
+			if (data[b] != (uint64)0) {
+				return false;
+			}
+		}
+		if (esize % 64) {
+			uint64 bitmask = ~((uint64)-1 << (esize % 64));
+			if ((data[b] & bitmask) != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool any() const
+	{
+		return !none();
+	}
+
+	uint count() const
+	{
+		if (all()) {
+			return esize;
+		}
+		if (none()) {
+			return 0;
+		}
+		uint c = 0, b;
+		for (b = 0; b < esize / 64; b++) {
+			for (uint i = 0; i < 64; i++) {
+				if (data[b] & ((uint64)1 << i)) {
+					c++;
+				}
+			}
+		}
+		uint mod = esize % 64;
+		if (mod) {
+			for (uint i = 0; i < mod; i++) {
+				if (data[b] & ((uint64)1 << i)) {
+					c++;
+				}
+			}
+		}
+		return c;
+	}
+
+	void toggle(uint n)
+	{
+		if (at(n)) {
+			reset(n);
+		} else {
+			set(n);
+		}
+	}
+
+	void reset()
+	{
+		memset(data, 0x00, msize);
+	}
+
+	void reset(uint n)
+	{
+		set(n, false);
+	}
+
+	void set()
+	{
+		memset(data, 0xFF, msize);
+	}
+
+	void set(uint n)
+	{
+		set(n, true);
+	}
+
+	bool compare(const Bitset<esize> &o) const
+	{
+		uint b;
+		for (b = 0; b < esize / 64; b++) {
+			if (data[b] != o.data[b]) {
+				return false;
+			}
+		}
+		if (esize % 64) {
+			uint64 bitmask = ~((uint64)-1 << (esize % 64));
+			if ((data[b] & bitmask) != (o.data[b] & bitmask)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool operator == (const Bitset<esize> &o) const
+	{
+		return compare(o);
+	}
+
+	bool operator != (const Bitset<esize> &o) const
+	{
+		return !compare(o);
+	}
+};
+
+template <int esize>
+static inline Bitset<esize> ClrBit(Bitset<esize> &x, const uint8 y)
+{
+	x.set(y);
+	return x;
+}
 
  /**
  * Iterable ensemble of each set bit in a value.

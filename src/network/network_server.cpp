@@ -345,7 +345,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendClientInfo(NetworkClientIn
 	if (ci->client_id != INVALID_CLIENT_ID) {
 		Packet *p = new Packet(PACKET_SERVER_CLIENT_INFO);
 		p->Send_uint32(ci->client_id);
-		p->Send_uint8 (ci->client_playas);
+		p->Send_uint16(ci->client_playas);
 		p->Send_string(ci->client_name);
 
 		this->SendPacket(p);
@@ -765,7 +765,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMove(ClientID client_id, C
 	Packet *p = new Packet(PACKET_SERVER_MOVE);
 
 	p->Send_uint32(client_id);
-	p->Send_uint8(company_id);
+	p->Send_uint16(company_id);
 	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -775,7 +775,9 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCompanyUpdate()
 {
 	Packet *p = new Packet(PACKET_SERVER_COMPANY_UPDATE);
 
-	p->Send_uint16(_network_company_passworded);
+	for (uint i = 0; i < CompanyMask::bsize; i++) {
+		p->Send_uint64(_network_company_passworded.data[i]);
+	}
 	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -785,7 +787,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendConfigUpdate()
 {
 	Packet *p = new Packet(PACKET_SERVER_CONFIG_UPDATE);
 
-	p->Send_uint8(_settings_client.network.max_companies);
+	p->Send_uint16(_settings_client.network.max_companies);
 	p->Send_string(_settings_client.network.server_name);
 	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
@@ -844,7 +846,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_JOIN(Packet *p)
 	}
 
 	std::string client_name = p->Recv_string(NETWORK_CLIENT_NAME_LENGTH);
-	CompanyID playas = (Owner)p->Recv_uint8();
+	CompanyID playas = (Owner)p->Recv_uint16();
 
 	if (this->HasClientQuit()) return NETWORK_RECV_STATUS_CLIENT_QUIT;
 
@@ -859,6 +861,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_JOIN(Packet *p)
 			break;
 		default: // Join another company (companies 1-8 (index 0-7))
 			if (!Company::IsValidHumanID(playas)) {
+				printf("!IsValidHumanID %d\n", playas);
 				return this->SendError(NETWORK_ERROR_COMPANY_MISMATCH);
 			}
 			break;
@@ -1054,6 +1057,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_COMMAND(Packet 
 	if (!(cp.cmd == CMD_COMPANY_CTRL && cca == CCA_NEW && ci->client_playas == COMPANY_NEW_COMPANY) && ci->client_playas != cp.company) {
 		IConsolePrint(CC_WARNING, "Kicking client #{} (IP: {}) due to calling a command as another company {}.",
 		               ci->client_playas + 1, this->GetClientIP(), cp.company + 1);
+		printf("Clients calling each others' commands\n");
 		return this->SendError(NETWORK_ERROR_COMPANY_MISMATCH);
 	}
 
@@ -1408,7 +1412,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_MOVE(Packet *p)
 {
 	if (this->status != STATUS_ACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	CompanyID company_id = (Owner)p->Recv_uint8();
+	CompanyID company_id = (Owner)p->Recv_uint16();
 
 	/* Check if the company is valid, we don't allow moving to AI companies */
 	if (company_id != COMPANY_SPECTATOR && !Company::IsValidHumanID(company_id)) return NETWORK_RECV_STATUS_OKAY;
@@ -1896,7 +1900,7 @@ void NetworkServerUpdateCompanyPassworded(CompanyID company_id, bool passworded)
 {
 	if (NetworkCompanyIsPassworded(company_id) == passworded) return;
 
-	SB(_network_company_passworded, company_id, 1, !!passworded);
+	_network_company_passworded.set(company_id, passworded);
 	SetWindowClassesDirty(WC_COMPANY);
 
 	for (NetworkClientSocket *cs : NetworkClientSocket::Iterate()) {

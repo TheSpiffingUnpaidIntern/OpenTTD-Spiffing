@@ -73,7 +73,7 @@ struct DifficultySettings {
 	byte   competitor_start_time;            ///< Unused value, used to load old savegames.
 	byte   competitor_intelligence;          ///< Unused value, used to load old savegames.
 
-	byte   max_no_competitors;               ///< the number of competitors (AIs)
+	uint16   max_no_competitors;               ///< the number of competitors (AIs)
 	byte   number_towns;                     ///< the amount of towns
 	byte   industry_density;                 ///< The industry density. @see IndustryDensity
 	uint32 max_loan;                         ///< the maximum initial loan
@@ -292,8 +292,8 @@ struct NetworkSettings {
 	uint8       autoclean_unprotected;                    ///< remove passwordless companies after this many months
 	uint8       autoclean_protected;                      ///< remove the password from passworded companies after this many months
 	uint8       autoclean_novehicles;                     ///< remove companies with no vehicles after this many months
-	uint8       max_companies;                            ///< maximum amount of companies
-	uint8       max_clients;                              ///< maximum amount of clients
+	uint16       max_companies;                            ///< maximum amount of companies
+	uint16       max_clients;                              ///< maximum amount of clients
 	Year        restart_game_year;                        ///< year the server restarts
 	uint8       min_active_clients;                       ///< minimum amount of active clients to unpause the game
 	bool        reload_cfg;                               ///< reload the config file before restarting

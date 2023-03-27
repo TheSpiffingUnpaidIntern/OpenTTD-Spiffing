@@ -341,6 +341,7 @@ enum SaveLoadVersion : uint16 {
 	SLV_DOCK_DOCKINGTILES,                  ///< 298  PR#9578 All tiles around docks may be docking tiles.
 	SLV_REPAIR_OBJECT_DOCKING_TILES,        ///< 299  PR#9594 v12.0  Fixing issue with docking tiles overlapping objects.
 
+	SLV_FIVE_HUNDRED_COMPANIES = 666,
 	SL_MAX_VERSION,                         ///< Highest possible saveload version
 };
 

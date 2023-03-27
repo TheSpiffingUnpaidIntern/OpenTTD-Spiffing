@@ -49,7 +49,7 @@ struct GraphLegendWindow : Window {
 		this->InitNested(window_number);
 
 		for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
-			if (!HasBit(_legend_excluded_companies, c)) this->LowerWidget(c + WID_GL_FIRST_COMPANY);
+			if (!_legend_excluded_companies.at(c)) this->LowerWidget(c + WID_GL_FIRST_COMPANY);
 
 			this->OnInvalidateData(c);
 		}
@@ -70,14 +70,14 @@ struct GraphLegendWindow : Window {
 
 		SetDParam(0, cid);
 		SetDParam(1, cid);
-		DrawString(r.left + (rtl ? (uint)WD_FRAMERECT_LEFT : (d.width + ScaleGUITrad(4))), r.right - (rtl ? (d.width + ScaleGUITrad(4)) : (uint)WD_FRAMERECT_RIGHT), CenterBounds(r.top, r.bottom, FONT_HEIGHT_NORMAL), STR_COMPANY_NAME_COMPANY_NUM, HasBit(_legend_excluded_companies, cid) ? TC_BLACK : TC_WHITE);
+		DrawString(r.left + (rtl ? (uint)WD_FRAMERECT_LEFT : (d.width + ScaleGUITrad(4))), r.right - (rtl ? (d.width + ScaleGUITrad(4)) : (uint)WD_FRAMERECT_RIGHT), CenterBounds(r.top, r.bottom, FONT_HEIGHT_NORMAL), STR_COMPANY_NAME_COMPANY_NUM, _legend_excluded_companies.at(cid) ? TC_BLACK : TC_WHITE);
 	}
 
 	void OnClick(Point pt, int widget, int click_count) override
 	{
 		if (!IsInsideMM(widget, WID_GL_FIRST_COMPANY, MAX_COMPANIES + WID_GL_FIRST_COMPANY)) return;
 
-		ToggleBit(_legend_excluded_companies, widget - WID_GL_FIRST_COMPANY);
+		_legend_excluded_companies.toggle(widget - WID_GL_FIRST_COMPANY);
 		this->ToggleWidgetLoweredState(widget);
 		this->SetDirty();
 		InvalidateWindowData(WC_INCOME_GRAPH, 0);
@@ -97,7 +97,7 @@ struct GraphLegendWindow : Window {
 		if (!gui_scope) return;
 		if (Company::IsValidID(data)) return;
 
-		SetBit(_legend_excluded_companies, data);
+		_legend_excluded_companies.set(data);
 		this->RaiseWidget(data + WID_GL_FIRST_COMPANY);
 	}
 };
@@ -167,7 +167,7 @@ struct ValuesInterval {
 
 struct BaseGraphWindow : Window {
 protected:
-	static const int GRAPH_MAX_DATASETS     =  64;
+	static const int GRAPH_MAX_DATASETS     =  (int)MAX_COMPANIES > (int)NUM_CARGO? (int)MAX_COMPANIES : (int)NUM_CARGO;
 	static const int GRAPH_BASE_COLOUR      =  GREY_SCALE(2);
 	static const int GRAPH_GRID_COLOUR      =  GREY_SCALE(3);
 	static const int GRAPH_AXIS_LINE_COLOUR =  GREY_SCALE(1);
@@ -180,8 +180,8 @@ protected:
 	static const int MIN_GRAPH_NUM_LINES_Y  =   9; ///< Minimal number of horizontal lines to draw.
 	static const int MIN_GRID_PIXEL_SIZE    =  20; ///< Minimum distance between graph lines.
 
-	uint64 excluded_data; ///< bitmask of the datasets that shouldn't be displayed.
-	byte num_dataset;
+	Bitset<GRAPH_MAX_DATASETS> excluded_data; ///< bitmask of the datasets that shouldn't be displayed.
+	int num_dataset;
 	byte num_on_x_axis;
 	byte num_vert_lines;
 
@@ -215,7 +215,7 @@ protected:
 		current_interval.lowest  = INT64_MAX;
 
 		for (int i = 0; i < this->num_dataset; i++) {
-			if (HasBit(this->excluded_data, i)) continue;
+			if (this->excluded_data.at(i)) continue;
 			for (int j = 0; j < this->num_on_x_axis; j++) {
 				OverflowSafeInt64 datapoint = this->cost[i][j];
 
@@ -422,7 +422,7 @@ protected:
 		uint pointoffs1 = (linewidth + 1) / 2;
 		uint pointoffs2 = linewidth + 1 - pointoffs1;
 		for (int i = 0; i < this->num_dataset; i++) {
-			if (!HasBit(this->excluded_data, i)) {
+			if (!this->excluded_data.at(i)) {
 				/* Centre the dot between the grid lines. */
 				x = r.left + (x_sep / 2);
 
@@ -574,7 +574,7 @@ public:
 
 		/* Exclude the companies which aren't valid */
 		for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
-			if (!Company::IsValidID(c)) SetBit(excluded_companies, c);
+			if (!Company::IsValidID(c)) excluded_companies.set(c);
 		}
 
 		byte nums = 0;
@@ -908,11 +908,11 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 	void UpdateExcludedData()
 	{
-		this->excluded_data = 0;
+		this->excluded_data.reset();
 
 		int i = 0;
 		for (const CargoSpec *cs : _sorted_standard_cargo_specs) {
-			if (HasBit(_legend_excluded_cargo, cs->Index())) SetBit(this->excluded_data, i);
+			if (HasBit(_legend_excluded_cargo, cs->Index())) this->excluded_data.set(i);
 			i++;
 		}
 	}
@@ -983,7 +983,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 			case WID_CPR_ENABLE_CARGOES:
 				/* Remove all cargoes from the excluded lists. */
 				_legend_excluded_cargo = 0;
-				this->excluded_data = 0;
+				this->excluded_data.reset();
 				this->SetDirty();
 				break;
 
@@ -992,7 +992,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 				int i = 0;
 				for (const CargoSpec *cs : _sorted_standard_cargo_specs) {
 					SetBit(_legend_excluded_cargo, cs->Index());
-					SetBit(this->excluded_data, i);
+					this->excluded_data.set(i);
 					i++;
 				}
 				this->SetDirty();
@@ -1135,6 +1135,7 @@ static inline StringID GetPerformanceTitleFromValue(uint value)
 class CompanyLeagueWindow : public Window {
 private:
 	GUIList<const Company*> companies;
+	Scrollbar *vscroll;
 	uint ordinal_width; ///< The width of the ordinal number
 	uint text_width;    ///< The width of the actual text
 	uint icon_width;    ///< The width of the company icon
@@ -1166,7 +1167,10 @@ private:
 public:
 	CompanyLeagueWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc)
 	{
-		this->InitNested(window_number);
+		this->CreateNestedTree();
+		this->vscroll = this->GetScrollbar(WID_CLW_SCROLLBAR);
+		this->FinishInitNested(window_number);
+
 		this->companies.ForceRebuild();
 		this->companies.NeedResort();
 	}
@@ -1176,6 +1180,7 @@ public:
 		this->BuildCompanyList();
 		this->companies.Sort(&PerformanceSorter);
 
+		this->vscroll->SetCount(this->companies.size());
 		this->DrawWidgets();
 	}
 
@@ -1193,9 +1198,14 @@ public:
 		uint text_left     = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - WD_FRAMERECT_LEFT - this->text_width;
 		uint text_right    = rtl ? r.left + WD_FRAMERECT_LEFT + this->text_width : r.right - WD_FRAMERECT_LEFT;
 
-		for (uint i = 0; i != this->companies.size(); i++) {
+		uint count = std::min((size_t)this->vscroll->GetCapacity(), this->companies.size());
+		for (uint i = this->vscroll->GetPosition(), t = i + count; i != t; i++) {
 			const Company *c = this->companies[i];
-			DrawString(ordinal_left, ordinal_right, y, i + STR_ORDINAL_NUMBER_1ST, i == 0 ? TC_WHITE : TC_YELLOW);
+			if (i + STR_ORDINAL_NUMBER_1ST <= STR_ORDINAL_NUMBER_15TH) {
+				DrawString(ordinal_left, ordinal_right, y, i + STR_ORDINAL_NUMBER_1ST, i == 0 ? TC_WHITE : TC_YELLOW);
+			} else {
+				DrawString(ordinal_left, ordinal_right, y, (std::to_string(i + 1) + '.').c_str(), i == 0 ? TC_WHITE: TC_YELLOW);
+			}
 
 			DrawCompanyIcon(c->index, icon_left, y + icon_y_offset);
 
@@ -1213,7 +1223,11 @@ public:
 
 		this->ordinal_width = 0;
 		for (uint i = 0; i < MAX_COMPANIES; i++) {
-			this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox(STR_ORDINAL_NUMBER_1ST + i).width);
+			if (i + STR_ORDINAL_NUMBER_1ST <= STR_ORDINAL_NUMBER_15TH) {
+				this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox(STR_ORDINAL_NUMBER_1ST + i).width);
+			} else {
+				this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox((std::to_string(i + 1) + '.').c_str()).width);
+			}
 		}
 		this->ordinal_width += 5; // Keep some extra spacing
 
@@ -1240,10 +1254,15 @@ public:
 
 		this->text_width = widest_width + 30; // Keep some extra spacing
 
+		resize->height = this->line_height;
 		size->width = WD_FRAMERECT_LEFT + this->ordinal_width + WD_FRAMERECT_RIGHT + this->icon_width + WD_FRAMERECT_LEFT + this->text_width + WD_FRAMERECT_RIGHT;
-		size->height = WD_FRAMERECT_TOP + this->line_height * MAX_COMPANIES + WD_FRAMERECT_BOTTOM;
+		size->height = WD_FRAMERECT_TOP + this->line_height * OLD_MAX_COMPANIES + WD_FRAMERECT_BOTTOM;
 	}
 
+	virtual void OnResize()
+	{
+		this->vscroll->SetCapacityFromWidget(this, WID_CL_BACKGROUND, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
+	}
 
 	void OnGameTick() override
 	{
@@ -1275,7 +1294,13 @@ static const NWidgetPart _nested_company_league_widgets[] = {
 		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, WID_CL_BACKGROUND), SetMinimalSize(400, 0), SetMinimalTextLines(15, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, WID_CL_BACKGROUND), SetMinimalSize(400, 0), SetScrollbar(WID_CLW_SCROLLBAR), EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_VSCROLLBAR, COLOUR_GREY, WID_CLW_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_GREY),
+		EndContainer(),
+	EndContainer(),
 };
 
 static WindowDesc _company_league_desc(
@@ -1293,16 +1318,28 @@ void ShowCompanyLeagueTable()
 /*****************************/
 /* PERFORMANCE RATING DETAIL */
 /*****************************/
-
+#include "table/string_colours.h"
 struct PerformanceRatingDetailWindow : Window {
 	static CompanyID company;
+	Scrollbar *vscroll;
+	NWidgetMatrix *matrix;
 	int timeout;
 
 	PerformanceRatingDetailWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc)
 	{
 		this->UpdateCompanyStats();
 
-		this->InitNested(window_number);
+		this->CreateNestedTree();
+		this->vscroll = this->GetScrollbar(WID_PRD_SCROLLBAR);
+		this->FinishInitNested(window_number);
+
+		int count = 8;
+		int total = (WID_PRD_COMPANY_LAST + 1 - WID_PRD_COMPANY_FIRST)/count;
+		if (total*count < (WID_PRD_COMPANY_LAST + 1 - WID_PRD_COMPANY_FIRST)) {
+			total += 1;
+		}
+		this->vscroll->SetCount(total);
+
 		this->OnInvalidateData(INVALID_COMPANY);
 	}
 
@@ -1326,10 +1363,22 @@ struct PerformanceRatingDetailWindow : Window {
 	uint score_detail_left;
 	uint score_detail_right;
 
+	void OnPaint() override
+	{
+
+		int count = 8;
+		int total = (WID_PRD_COMPANY_LAST + 1 - WID_PRD_COMPANY_FIRST)/count;
+		if (total*count < (WID_PRD_COMPANY_LAST + 1 - WID_PRD_COMPANY_FIRST)) {
+			total += 1;
+		}
+		this->vscroll->SetCount(total);
+		this->DrawWidgets();
+	}
+
 	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
 	{
 		switch (widget) {
-			case WID_PRD_SCORE_FIRST:
+			case WID_PRD_SCORE_FIRST: {
 				this->bar_height = FONT_HEIGHT_NORMAL + 4;
 				size->height = this->bar_height + 2 * WD_MATRIX_TOP;
 
@@ -1381,6 +1430,17 @@ struct PerformanceRatingDetailWindow : Window {
 				this->bar_left  = left + (rtl ? score_detail_width : score_info_width) + 5;
 				this->bar_right = this->bar_left + this->bar_width;
 				break;
+			}
+			case WID_PRD_BACKGROUND: {
+				Dimension sprite_size = GetSpriteSize(SPR_COMPANY_ICON, nullptr, ZOOM_LVL_OUT_4X);
+				sprite_size.width  += WD_MATRIX_LEFT + WD_MATRIX_RIGHT;
+				sprite_size.height += WD_MATRIX_TOP + WD_MATRIX_BOTTOM + 1;
+				resize->width = 1/*sprite_size.width*/;
+				resize->height = sprite_size.height;
+				size->height = 5 * sprite_size.height;
+				size->width = 8 * sprite_size.width;
+				break;
+			}
 		}
 	}
 
@@ -1389,12 +1449,87 @@ struct PerformanceRatingDetailWindow : Window {
 		/* No need to draw when there's nothing to draw */
 		if (this->company == INVALID_COMPANY) return;
 
-		if (IsInsideMM(widget, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST + 1)) {
-			if (this->IsWidgetDisabled(widget)) return;
-			CompanyID cid = (CompanyID)(widget - WID_PRD_COMPANY_FIRST);
-			int offset = (cid == this->company) ? 1 : 0;
+// 		if (IsInsideMM(widget, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST + 1)) {
+// // 		if (IsInsideMM(widget, pos, max)) {
+// 			if (this->IsWidgetDisabled(widget)) return;
+// 			CompanyID cid = (CompanyID)(widget - WID_PRD_COMPANY_FIRST);
+// 			int offset = (cid == this->company) ? 1 : 0;
+// 			Dimension sprite_size = GetSpriteSize(SPR_COMPANY_ICON);
+// 			DrawCompanyIcon(cid, (r.left + r.right - sprite_size.width) / 2 + offset, (r.top + r.bottom - sprite_size.height) / 2 + offset);
+// 			return;
+// 		}
+
+		if (widget == WID_PRD_BACKGROUND) {
+			int pos = this->vscroll->GetPosition();
+			int max = pos + this->vscroll->GetCapacity();
+			int x = r.left;
+			int y = r.top;
 			Dimension sprite_size = GetSpriteSize(SPR_COMPANY_ICON);
-			DrawCompanyIcon(cid, (r.left + r.right - sprite_size.width) / 2 + offset, (r.top + r.bottom - sprite_size.height) / 2 + offset);
+			int orig_width = sprite_size.width;
+			int orig_height = sprite_size.height;
+			sprite_size.width  += WD_MATRIX_LEFT + WD_MATRIX_RIGHT;
+			sprite_size.height += WD_MATRIX_TOP + WD_MATRIX_BOTTOM + 1;
+			int xsize = this->GetWidget<NWidgetBase>(WID_PRD_BACKGROUND)->current_x;
+			int total_selection = 8;
+			sprite_size.width = std::max(sprite_size.width, uint(xsize/total_selection));
+// 			printf("Draw Widget %d, %d, %d, %d, %d\n",pos, max, xsize, total_selection, max*total_selection);
+// 			if ()
+			for (int index = pos*total_selection; index < max*total_selection; index++) {
+// 			for (const CargoSpec *cs : _sorted_standard_cargo_specs) {
+				if (index >= MAX_COMPANIES) {
+					GfxFillRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, _colour_gradient[COLOUR_BROWN][3]);
+					x += sprite_size.width;
+					if (x >= total_selection*sprite_size.width) {
+						x = r.left;
+						y += sprite_size.height;
+					}
+					continue;
+				}
+				if (!Company::IsValidID(index)) {
+					GfxFillRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, _colour_gradient[COLOUR_BROWN][2], FILLRECT_CHECKER);
+					x += sprite_size.width;
+					if (x >= total_selection*sprite_size.width) {
+						x = r.left;
+						y += sprite_size.height;
+					}
+					continue;
+				}
+// 				if (pos-- > 0) continue;
+// 				if (--max < 0) break;
+
+				CompanyID cid = (CompanyID)(index);
+				bool lowered = (cid == this->company); //!HasBit(_legend_excluded_cargo, cs->Index());
+				int offset = (cid == this->company) ? 1 : 0;
+
+				if (lowered) {
+					DrawFrameRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, COLOUR_BROWN, FR_LOWERED);
+				} else {
+					DrawFrameRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, COLOUR_BROWN, FR_NONE);
+				}
+// 				byte clk_dif = lowered ? 1 : 0;
+// 				int rect_x = clk_dif + (rtl ? r.right - this->legend_width - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT);
+
+// 				GfxFillRect(rect_x, y + padding + clk_dif, rect_x + this->legend_width, y + row_height - 1 + clk_dif, PC_BLACK);
+// 				GfxFillRect(rect_x + 1, y + padding + 1 + clk_dif, rect_x + this->legend_width - 1, y + row_height - 2 + clk_dif, cs->legend_colour);
+// 				SetDParam(0, cs->name);
+				DrawCompanyIcon(cid, x + (sprite_size.width - orig_width)/2 + offset, y + (sprite_size.height - orig_height)/2 + offset);
+// 				(x + x+sprite_size.width - sprite_size.width)/2
+// 				DrawString(rtl ? r.left : x + this->legend_width + 4 + clk_dif, (rtl ? r.right - this->legend_width - 4 + clk_dif : r.right), y + clk_dif, STR_GRAPH_CARGO_PAYMENT_CARGO);
+				x += sprite_size.width;
+				if (x >= total_selection*sprite_size.width) {
+					x = r.left;
+					y += sprite_size.height;
+				}
+			}
+			return;
+		}
+
+		if (widget == WID_PRD_COMPANY_NAME) {
+			uint bar_top  = r.top + WD_MATRIX_TOP;
+			uint text_top = bar_top + 2;
+			SetDParam(0, this->company);
+			SetDParam(1, this->company);
+			DrawString(this->score_info_left, this->score_detail_right, text_top, STR_COMPANY_NAME, TC_BLACK);
 			return;
 		}
 
@@ -1466,15 +1601,22 @@ struct PerformanceRatingDetailWindow : Window {
 	void OnClick(Point pt, int widget, int click_count) override
 	{
 		/* Check which button is clicked */
-		if (IsInsideMM(widget, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST + 1)) {
-			/* Is it no on disable? */
-			if (!this->IsWidgetDisabled(widget)) {
-				this->RaiseWidget(this->company + WID_PRD_COMPANY_FIRST);
-				this->company = (CompanyID)(widget - WID_PRD_COMPANY_FIRST);
-				this->LowerWidget(this->company + WID_PRD_COMPANY_FIRST);
-				this->SetDirty();
-			}
+		if (widget != WID_PRD_BACKGROUND) {
+			return;
 		}
+		Dimension sprite_size = GetSpriteSize(SPR_COMPANY_ICON);
+		sprite_size.width  += WD_MATRIX_LEFT + WD_MATRIX_RIGHT;
+		sprite_size.height += WD_MATRIX_TOP + WD_MATRIX_BOTTOM + 1;
+		int sel = this->vscroll->GetScrolledRowFromWidget(pt.y, this, WID_PRD_BACKGROUND);
+		int xsize = this->GetWidget<NWidgetBase>(WID_PRD_BACKGROUND)->current_x;
+		int count = 8;
+		int x_sel = pt.x / (xsize/count);
+		int total_selection = count*sel + x_sel;
+		if (total_selection < MAX_COMPANIES) {
+			this->company = (CompanyID)(total_selection);
+			this->SetDirty();
+		}
+// 		printf("Selected %d, %d, %d\n", sel, x_sel, total_selection);
 	}
 
 	void OnGameTick() override
@@ -1494,15 +1636,9 @@ struct PerformanceRatingDetailWindow : Window {
 	void OnInvalidateData(int data = 0, bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
-		/* Disable the companies who are not active */
-		for (CompanyID i = COMPANY_FIRST; i < MAX_COMPANIES; i++) {
-			this->SetWidgetDisabledState(i + WID_PRD_COMPANY_FIRST, !Company::IsValidID(i));
-		}
 
 		/* Check if the currently selected company is still active. */
 		if (this->company != INVALID_COMPANY && !Company::IsValidID(this->company)) {
-			/* Raise the widget for the previous selection. */
-			this->RaiseWidget(this->company + WID_PRD_COMPANY_FIRST);
 			this->company = INVALID_COMPANY;
 		}
 
@@ -1512,9 +1648,11 @@ struct PerformanceRatingDetailWindow : Window {
 				break;
 			}
 		}
+	}
 
-		/* Make sure the widget is lowered */
-		this->LowerWidget(this->company + WID_PRD_COMPANY_FIRST);
+	void OnResize() override
+	{
+		this->vscroll->SetCapacityFromWidget(this, WID_PRD_BACKGROUND/*, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM*/);
 	}
 };
 
@@ -1544,6 +1682,11 @@ static NWidgetBase *MakePerformanceDetailPanels(int *biggest_index)
 	static_assert(lengthof(performance_tips) == SCORE_END - SCORE_BEGIN);
 
 	NWidgetVertical *vert = new NWidgetVertical(NC_EQUALSIZE);
+	NWidgetBackground *panel = new NWidgetBackground(WWT_PANEL, COLOUR_BROWN, WID_PRD_COMPANY_NAME);
+	panel->SetFill(1, 1);
+// 	panel->SetDataTip(0x0, performance_tips[widnum - WID_PRD_SCORE_FIRST]);
+	vert->Add(panel);
+
 	for (int widnum = WID_PRD_SCORE_FIRST; widnum <= WID_PRD_SCORE_LAST; widnum++) {
 		NWidgetBackground *panel = new NWidgetBackground(WWT_PANEL, COLOUR_BROWN, widnum);
 		panel->SetFill(1, 1);
@@ -1557,7 +1700,56 @@ static NWidgetBase *MakePerformanceDetailPanels(int *biggest_index)
 /** Make a number of rows with buttons for each company for the performance rating detail window. */
 NWidgetBase *MakeCompanyButtonRowsGraphGUI(int *biggest_index)
 {
-	return MakeCompanyButtonRows(biggest_index, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST, COLOUR_BROWN, 8, STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP);
+// 	printf("%s\n", __PRETTY_FUNCTION__);
+// 	auto *widget = MakeCompanyButtonRows(biggest_index, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST, COLOUR_BROWN, 8, STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP);
+	NWidgetMatrix *mat = new NWidgetMatrix();
+	mat->SetIndex(WID_PRD_BACKGROUND);
+// 	NWidgetVertical *vert = nullptr; // Storage for all rows.
+// 	NWidgetHorizontal *hor = nullptr; // Storage for buttons in one row.
+// 	int hor_length = 0;
+// // button_tooltip
+// 	Dimension sprite_size = GetSpriteSize(SPR_COMPANY_ICON, nullptr, ZOOM_LVL_OUT_4X);
+// 	sprite_size.width  += WD_MATRIX_LEFT + WD_MATRIX_RIGHT;
+// 	sprite_size.height += WD_MATRIX_TOP + WD_MATRIX_BOTTOM + 1; // 1 for the 'offset' of being pressed
+//
+// 	for (int widnum = WID_PRD_COMPANY_FIRST; widnum <= WID_PRD_COMPANY_LAST; widnum++) {
+// 		/* Ensure there is room in 'hor' for another button. */
+// // 		if (hor_length == 8) {
+// // 			if (vert == nullptr) vert = new NWidgetVertical();
+// // 			vert->Add(hor);
+// // 			hor = nullptr;
+// // 			hor_length = 0;
+// // 		}
+// // 		if (hor == nullptr) {
+// // 			hor = new NWidgetHorizontal();
+// // 			hor_length = 0;
+// // 		}
+//
+// 		NWidgetBackground *panel = new NWidgetBackground(WWT_PANEL, COLOUR_BROWN, widnum);
+// 		panel->SetMinimalSize(sprite_size.width, sprite_size.height);
+// 		panel->SetFill(1, 1);
+// 		panel->SetResize(1, 0);
+// 		panel->SetDataTip(0x0, STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP);
+// 		mat->Add(panel);
+// 		hor_length++;
+// 	}
+// // 	if (vert == nullptr) return hor; // All buttons fit in a single row.
+//
+// 	if (hor_length > 0 && hor_length < 8) {
+// 		/* Last row is partial, add a spacer at the end to force all buttons to the left. */
+// 		NWidgetSpacer *spc = new NWidgetSpacer(sprite_size.width, sprite_size.height);
+// 		spc->SetFill(1, 1);
+// 		spc->SetResize(1, 0);
+// 		mat->Add(spc);
+// 	}
+// 	mat->SetCount(hor_length);
+	*biggest_index = WID_PRD_COMPANY_LAST;
+// 	if (hor != nullptr) vert->Add(hor);
+
+// 	widget->SetScrollbar(WID_PRD_SCROLLBAR);
+	return mat;
+
+	/*return widget;*//*MakeCompanyButtonRows(biggest_index, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST, COLOUR_BROWN, 8, STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP);*/
 }
 
 static const NWidgetPart _nested_performance_rating_detail_widgets[] = {
@@ -1567,10 +1759,21 @@ static const NWidgetPart _nested_performance_rating_detail_widgets[] = {
 		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN),
-		NWidgetFunction(MakeCompanyButtonRowsGraphGUI), SetPadding(0, 1, 1, 2),
+	NWidget(NWID_HORIZONTAL),
+// 		NWidget(WWT_PANEL, COLOUR_BROWN),/* SetMinimalSize(400, 10),*/
+		NWidget(WWT_MATRIX, COLOUR_GREY, WID_PRD_BACKGROUND), SetMinimalSize(20, 20), SetFill(1, 1), SetResize(1, 1),/*SetPadding(0, 1, 1, 2), SetFill(0, 1),*/ /*SetPIP(0, 2, 0),*/
+		SetScrollbar(WID_PRD_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, WID_PRD_SCROLLBAR),
+// 			NWidgetFunction(MakeCompanyButtonRowsGraphGUI), SetPadding(0, 1, 1, 2),
+// 			NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetFill(0, 0), /*SetResize(0, 0),*/ SetMinimalSize(66, 60),
+// 			SetScrollbar(WID_PRD_SCROLLBAR),
+// 			EndContainer(),
+// 		EndContainer(),
 	EndContainer(),
-	NWidgetFunction(MakePerformanceDetailPanels),
+	NWidget(NWID_HORIZONTAL),
+		NWidgetFunction(MakePerformanceDetailPanels),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
+	EndContainer(),
 };
 
 static WindowDesc _performance_rating_detail_desc(
@@ -1587,6 +1790,6 @@ void ShowPerformanceRatingDetail()
 
 void InitializeGraphGui()
 {
-	_legend_excluded_companies = 0;
+	_legend_excluded_companies.reset();
 	_legend_excluded_cargo = 0;
 }

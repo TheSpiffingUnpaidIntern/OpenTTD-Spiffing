@@ -102,7 +102,9 @@ AIInfo *AIScannerInfo::FindInfo(const char *nameParam, int versionParam, bool fo
 
 	if (versionParam == -1) {
 		/* We want to load the latest version of this AI; so find it */
-		if (this->info_single_list.find(ai_name) != this->info_single_list.end()) return static_cast<AIInfo *>(this->info_single_list[ai_name]);
+		if (this->info_single_list.find(ai_name) != this->info_single_list.end()) {
+			return static_cast<AIInfo *>(this->info_single_list[ai_name]);
+		}
 		return nullptr;
 	}
 

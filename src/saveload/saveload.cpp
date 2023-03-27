@@ -106,7 +106,10 @@ struct ReadBuffer {
 	{
 		if (this->bufp == this->bufe) {
 			size_t len = this->reader->Read(this->buf, lengthof(this->buf));
-			if (len == 0) SlErrorCorrupt("Unexpected end of chunk");
+			if (len == 0) {
+				printf("Unexpected end of chunk\n");
+				SlErrorCorrupt("Unexpected end of chunk");
+			}
 
 			this->read += len;
 			this->bufp = this->buf;
@@ -673,10 +676,15 @@ int SlIterateArray()
 
 	/* After reading in the whole array inside the loop
 	 * we must have read in all the data, so we must be at end of current block. */
-	if (_next_offs != 0 && _sl.reader->GetSize() != _next_offs) SlErrorCorrupt("Invalid chunk size");
+	if (_next_offs != 0 && _sl.reader->GetSize() != _next_offs) {
+		printf("SlIterateArray %d, %lu, %lu\n", (_next_offs != 0 && _sl.reader->GetSize() != _next_offs), _next_offs, _sl.reader->GetSize());
+		printf("Invalid chunk size\n");
+		SlErrorCorrupt("Invalid chunk size");
+	}
 
 	for (;;) {
 		uint length = SlReadArrayLength();
+// 		printf("SlReadArrayLength %u\n", length);
 		if (length == 0) {
 			assert(!_sl.expect_table_header);
 			_next_offs = 0;
@@ -1060,6 +1068,7 @@ static void SlStdString(void *ptr, VarType conv)
 		case SLA_LOAD_CHECK:
 		case SLA_LOAD: {
 			size_t len = SlReadArrayLength();
+// 			printf("SlStdString %lu ", len);
 			if (GetVarMemType(conv) == SLE_VAR_NULL) {
 				SlSkipBytes(len);
 				return;
@@ -1083,6 +1092,7 @@ static void SlStdString(void *ptr, VarType conv)
 
 			// Store sanitized string.
 			str->assign(buf);
+// 			printf("\"%s\"\n", str->c_str());
 		}
 
 		case SLA_PTRS: break;
@@ -1554,6 +1564,7 @@ static void SlVector(void *vector, VarType conv)
 /** Are we going to save this object or not? */
 static inline bool SlIsObjectValidInSavegame(const SaveLoad &sld)
 {
+// 	printf("SlIsObjectValidInSavegame %d, %d, %d\n",_sl_version, sld.version_from, sld.version_to);
 	return (_sl_version >= sld.version_from && _sl_version < sld.version_to);
 }
 
@@ -1657,51 +1668,111 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad &sld)
 [[maybe_unused]] static bool IsVariableSizeRight(const SaveLoad &sld)
 {
 	if (GetVarMemType(sld.conv) == SLE_VAR_NULL) return true;
-
+// 	printf("IsVariableSizeRight ");
 	switch (sld.cmd) {
 		case SL_VAR:
+// 			printf("SL_VAR %d ", sld.size);
 			switch (GetVarMemType(sld.conv)) {
 				case SLE_VAR_BL:
+// 					printf("SLE_VAR_BL\n");
 					return sld.size == sizeof(bool);
 				case SLE_VAR_I8:
 				case SLE_VAR_U8:
+// 					printf("SLE_VAR_I8\n");
 					return sld.size == sizeof(int8);
 				case SLE_VAR_I16:
 				case SLE_VAR_U16:
+// 					printf("SLE_VAR_I16\n");
 					return sld.size == sizeof(int16);
 				case SLE_VAR_I32:
 				case SLE_VAR_U32:
+// 					printf("SLE_VAR_I32\n");
 					return sld.size == sizeof(int32);
 				case SLE_VAR_I64:
 				case SLE_VAR_U64:
+// 					printf("SLE_VAR_I64\n");
 					return sld.size == sizeof(int64);
 				case SLE_VAR_NAME:
+// 					printf("SLE_VAR_NAME\n");
 					return sld.size == sizeof(std::string);
 				default:
+// 					printf("SLE_VAR_DEF\n");
 					return sld.size == sizeof(void *);
 			}
 		case SL_REF:
+// 			printf("SL_REF %d\n", sld.size);
 			/* These should all be pointer sized. */
 			return sld.size == sizeof(void *);
 
 		case SL_STR:
+// 			printf("SL_STR %d\n", sld.size);
 			/* These should be pointer sized, or fixed array. */
 			return sld.size == sizeof(void *) || sld.size == sld.length;
 
 		case SL_STDSTR:
+// 			printf("SL_STDSTR %d\n", sld.size);
 			/* These should be all pointers to std::string. */
 			return sld.size == sizeof(std::string);
 
 		default:
+// 			printf("SL_DEF %d\n", sld.size);
 			return true;
 	}
 }
 
+static std::string to_hex(char data)
+{
+	static char hex[] = "0123456789abcdef";
+    int tmp = data;
+    tmp &= 0xff;
+    std::string ret;
+    ret += hex[(tmp/16)%16];
+    ret += hex[tmp%16];
+    return ret;
+}
+
+static void debugVar(char *ptr, size_t size)
+{
+	std::string dbg = "\n";
+    std::string tmp;
+    for (size_t i = 0 ; i < size; i++) {
+        if (i != 0 && (i % 16) == 0) {
+            dbg += "  ";
+            dbg += tmp;
+            dbg += "\n";
+            tmp = std::string();
+        }
+        if (isprint(ptr[i]) && ptr[i] != '\r' && ptr[i] != '\n') {
+            tmp += ptr[i];
+//             dbg += "\x1B[38;5;40;1;1;48;5;239m";
+            dbg += to_hex(ptr[i]);
+//             dbg += "\x1B[0m ";
+            dbg += ' ';
+        } else {
+            tmp += '.';
+//             dbg += "\x1B[38;5;196;1;1;48;5;239m";
+            dbg += to_hex(ptr[i]);
+//             dbg += "\x1B[0m ";
+            dbg += ' ';
+        }
+        if (i == size - 1) {
+            for (size_t j = (i % 16) + 1; j < 16; j++) {
+                dbg += "   ";
+            }
+            dbg += "  ";
+            dbg += tmp;
+            dbg += '\n';
+        }
+    }
+//     printf("%s\n", dbg.c_str());
+}
+
 static bool SlObjectMember(void *object, const SaveLoad &sld)
 {
+// 	printf("%s %lu, %d, %d, %d, ver %s, size %s\n", sld.name.c_str(), sld.size, sld.cmd, GetVarMemType(sld.conv), sld.length, SlIsObjectValidInSavegame(sld)?"true":"false", IsVariableSizeRight(sld)?"true":"false");
+	if (!SlIsObjectValidInSavegame(sld)) return false;
 	assert(IsVariableSizeRight(sld));
 
-	if (!SlIsObjectValidInSavegame(sld)) return false;
 
 	VarType conv = GB(sld.conv, 0, 8);
 	switch (sld.cmd) {
@@ -1716,14 +1787,15 @@ static bool SlObjectMember(void *object, const SaveLoad &sld)
 			void *ptr = GetVariableAddress(object, sld);
 
 			switch (sld.cmd) {
-				case SL_VAR: SlSaveLoadConv(ptr, conv); break;
-				case SL_REF: SlSaveLoadRef(ptr, conv); break;
-				case SL_ARR: SlArray(ptr, sld.length, conv); break;
-				case SL_STR: SlString(ptr, sld.length, sld.conv); break;
-				case SL_REFLIST: SlRefList(ptr, conv); break;
-				case SL_DEQUE: SlDeque(ptr, conv); break;
-				case SL_VECTOR: SlVector(ptr, conv); break;
-				case SL_STDSTR: SlStdString(ptr, sld.conv); break;
+				case SL_VAR: SlSaveLoadConv(ptr, conv); /*if(sld.name == "owner") {uint16 var; memcpy(&var, ptr, sld.size); printf("%p %p %04X ",ptr, object, var);}*/
+				          /*printf("%s\n", sld.name.c_str());if(GetVarMemType(sld.conv) == SLE_VAR_NAME){std::string *s_ptr = (std::string*)ptr; printf("%s\n",s_ptr->c_str());}debugVar((char*)ptr,sld.size);*/ break;
+				case SL_REF: SlSaveLoadRef(ptr, conv);            /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_ARR: SlArray(ptr, sld.length, conv);      /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_STR: SlString(ptr, sld.length, sld.conv); /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_REFLIST: SlRefList(ptr, conv);            /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_DEQUE: SlDeque(ptr, conv);                /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_VECTOR: SlVector(ptr, conv);              /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
+				case SL_STDSTR: SlStdString(ptr, sld.conv);       /*printf("%s\n", sld.name.c_str()); debugVar((char*)ptr,sld.size);*/ break;
 				default: NOT_REACHED();
 			}
 			break;
@@ -1736,7 +1808,7 @@ static bool SlObjectMember(void *object, const SaveLoad &sld)
 			void *ptr = GetVariableAddress(object, sld);
 
 			switch (_sl.action) {
-				case SLA_SAVE: SlWriteByte(*(uint8 *)ptr); break;
+				case SLA_SAVE: SlWriteByte(*(uint8 *)ptr); debugVar((char*)ptr,sld.size); break;
 				case SLA_LOAD_CHECK:
 				case SLA_LOAD:
 				case SLA_PTRS:
@@ -1752,7 +1824,7 @@ static bool SlObjectMember(void *object, const SaveLoad &sld)
 			switch (_sl.action) {
 				case SLA_LOAD_CHECK:
 				case SLA_LOAD: SlSkipBytes(SlCalcConvFileLen(sld.conv) * sld.length); break;
-				case SLA_SAVE: for (int i = 0; i < SlCalcConvFileLen(sld.conv) * sld.length; i++) SlWriteByte(0); break;
+				case SLA_SAVE: for (int i = 0; i < SlCalcConvFileLen(sld.conv) * sld.length; i++) { SlWriteByte(0);} break;
 				case SLA_PTRS:
 				case SLA_NULL: break;
 				default: NOT_REACHED();
@@ -1781,6 +1853,7 @@ static bool SlObjectMember(void *object, const SaveLoad &sld)
 				}
 
 				case SLA_LOAD: {
+// 					printf("STRUCT LOAD %s\n", sld.name.c_str());
 					if (sld.cmd == SL_STRUCT && !IsSavegameVersionBefore(SLV_SAVELOAD_LIST_LENGTH)) {
 						SlGetStructListLength(1);
 					}
@@ -1799,6 +1872,7 @@ static bool SlObjectMember(void *object, const SaveLoad &sld)
 
 		default: NOT_REACHED();
 	}
+// 	printf("%s\n", sld.name.c_str());
 	return true;
 }
 
@@ -1825,6 +1899,7 @@ void SlSetStructListLength(size_t length)
 size_t SlGetStructListLength(size_t limit)
 {
 	size_t length = SlReadArrayLength();
+// 	printf("SlGetStructListLength %lu\n", length);
 	if (length > limit) SlErrorCorrupt("List exceeds storage size");
 
 	return length;
@@ -2039,7 +2114,7 @@ std::vector<SaveLoad> SlCompatTableHeader(const SaveLoadTable &slt, const SaveLo
 	for (auto &sld : slt) {
 		/* All entries should have a name; otherwise the entry should just be removed. */
 		assert(!sld.name.empty());
-
+// 		printf("pushing %s\n",sld.name.c_str());
 		key_lookup[sld.name].push_back(&sld);
 	}
 
@@ -2057,6 +2132,7 @@ std::vector<SaveLoad> SlCompatTableHeader(const SaveLoadTable &slt, const SaveLo
 			if (sld_it == key_lookup.end()) {
 				/* This isn't an assert, as that leaves no information what
 				 * field was to blame. This way at least we have breadcrumbs. */
+				printf("internal error: saveload compatibility field '%s' not found\n", slc.name.c_str());
 				Debug(sl, 0, "internal error: saveload compatibility field '{}' not found", slc.name);
 				SlErrorCorrupt("Internal error with savegame compatibility");
 			}
@@ -2109,8 +2185,11 @@ void SlAutolength(AutolengthProc *proc, void *arg)
 
 	/* And write the stuff */
 	proc(arg);
-
-	if (offs != _sl.dumper->GetSize()) SlErrorCorrupt("Invalid chunk size");
+	if (offs != _sl.dumper->GetSize()) {
+		printf("SlAutolength %d, %lu, %lu\n",(offs != _sl.dumper->GetSize()), offs, _sl.dumper->GetSize());
+		printf("Invalid chunk size\n");
+		SlErrorCorrupt("Invalid chunk size");
+	}
 }
 
 void ChunkHandler::LoadCheck(size_t len) const
@@ -2171,7 +2250,11 @@ static void SlLoadChunk(const ChunkHandler &ch)
 			_sl.obj_len = len;
 			endoffs = _sl.reader->GetSize() + len;
 			ch.Load();
-			if (_sl.reader->GetSize() != endoffs) SlErrorCorrupt("Invalid chunk size");
+			if (_sl.reader->GetSize() != endoffs) {
+				printf("SlLoadChunk %c%c%c%c, %d, %lu, %lu\n",ch.id >> 24, ch.id >> 16, ch.id >> 8, ch.id, (_sl.reader->GetSize() != endoffs), _sl.reader->GetSize(), endoffs);
+				printf("Invalid chunk size\n");
+				SlErrorCorrupt("Invalid chunk size");
+			}
 			break;
 		default:
 			SlErrorCorrupt("Invalid chunk type");
@@ -2219,7 +2302,11 @@ static void SlLoadCheckChunk(const ChunkHandler &ch)
 			_sl.obj_len = len;
 			endoffs = _sl.reader->GetSize() + len;
 			ch.LoadCheck(len);
-			if (_sl.reader->GetSize() != endoffs) SlErrorCorrupt("Invalid chunk size");
+			if (_sl.reader->GetSize() != endoffs) {
+				printf("SlLoadCheckChunk %c%c%c%c, %d, %lu, %lu\n",ch.id >> 24, ch.id >> 16, ch.id >> 8, ch.id, (_sl.reader->GetSize() != endoffs), _sl.reader->GetSize(), endoffs);
+				printf("Invalid chunk size\n");
+				SlErrorCorrupt("Invalid chunk size");
+			}
 			break;
 		default:
 			SlErrorCorrupt("Invalid chunk type");
@@ -2299,8 +2386,8 @@ static void SlLoadChunks()
 	const ChunkHandler *ch;
 
 	for (id = SlReadUint32(); id != 0; id = SlReadUint32()) {
+// 		printf("Loading chunk %c%c%c%c\n",id >> 24, id >> 16, id >> 8, id);
 		Debug(sl, 2, "Loading chunk {:c}{:c}{:c}{:c}", id >> 24, id >> 16, id >> 8, id);
-
 		ch = SlFindChunkHandler(id);
 		if (ch == nullptr) SlErrorCorrupt("Unknown chunk type");
 		SlLoadChunk(*ch);
@@ -2315,6 +2402,7 @@ static void SlLoadCheckChunks()
 
 	for (id = SlReadUint32(); id != 0; id = SlReadUint32()) {
 		Debug(sl, 2, "Loading chunk {:c}{:c}{:c}{:c}", id >> 24, id >> 16, id >> 8, id);
+// 		printf("Loading chunk %c%c%c%c\n",id >> 24, id >> 16, id >> 8, id);
 
 		ch = SlFindChunkHandler(id);
 		if (ch == nullptr) SlErrorCorrupt("Unknown chunk type");
@@ -2554,7 +2642,6 @@ struct NoCompSaveFilter : SaveFilter {
 struct ZlibLoadFilter : LoadFilter {
 	z_stream z;                        ///< Stream state we are reading from.
 	byte fread_buf[MEMORY_CHUNK_SIZE]; ///< Buffer for reading from the file.
-
 	/**
 	 * Initialise this filter.
 	 * @param chain The next filter in this chain.
@@ -2575,7 +2662,6 @@ struct ZlibLoadFilter : LoadFilter {
 	{
 		this->z.next_out  = buf;
 		this->z.avail_out = (uint)size;
-
 		do {
 			/* read more bytes from the file? */
 			if (this->z.avail_in == 0) {
@@ -2589,7 +2675,6 @@ struct ZlibLoadFilter : LoadFilter {
 
 			if (r != Z_OK) SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_INTERNAL_ERROR, "inflate() failed");
 		} while (this->z.avail_out != 0);
-
 		return size - this->z.avail_out;
 	}
 };
@@ -3116,11 +3201,12 @@ static SaveOrLoadResult DoLoad(LoadFilter *reader, bool load_check)
 		if (fmt->tag == hdr[0]) {
 			/* check version number */
 			_sl_version = (SaveLoadVersion)(TO_BE32(hdr[1]) >> 16);
+// 			printf("sl_version %x\n", _sl_version);
 			/* Minor is not used anymore from version 18.0, but it is still needed
 			 * in versions before that (4 cases) which can't be removed easy.
 			 * Therefore it is loaded, but never saved (or, it saves a 0 in any scenario). */
 			_sl_minor_version = (TO_BE32(hdr[1]) >> 8) & 0xFF;
-
+// 			printf("_sl_minor_version %x\n", _sl_minor_version);
 			Debug(sl, 1, "Loading savegame version {}", _sl_version);
 
 			/* Is the version higher than the current? */
@@ -3131,7 +3217,7 @@ static SaveOrLoadResult DoLoad(LoadFilter *reader, bool load_check)
 
 		fmt++;
 	}
-
+// 	printf("Loader: %s\n", fmt->name);
 	/* loader for this savegame type is not implemented? */
 	if (fmt->init_load == nullptr) {
 		char err_str[64];
@@ -3310,6 +3396,7 @@ SaveOrLoadResult SaveOrLoad(const std::string &filename, SaveLoadOperation fop, 
 		/* LOAD game */
 		assert(fop == SLO_LOAD || fop == SLO_CHECK);
 		Debug(desync, 1, "load: {}", filename);
+// 		printf("load: %s\n",filename.c_str());
 		return DoLoad(new FileReader(fh), fop == SLO_CHECK);
 	} catch (...) {
 		/* This code may be executed both for old and new save games. */

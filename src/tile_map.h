@@ -180,8 +180,8 @@ static inline Owner GetTileOwner(TileIndex tile)
 	assert(IsValidTile(tile));
 	assert(!IsTileType(tile, MP_HOUSE));
 	assert(!IsTileType(tile, MP_INDUSTRY));
-
-	return (Owner)GB(_m[tile].m1, 0, 5);
+// 	printf("GetTileOwner: %u: %04X\n", (uint32)tile, (Owner)(GB(_m[tile].m1, 0, 5) | (((uint16)_me[tile].m9)<<5)));
+	return (Owner)(GB(_m[tile].m1, 0, 5) | (((uint16)_me[tile].m9&0x1F)<<5));
 }
 
 /**
@@ -202,6 +202,10 @@ static inline void SetTileOwner(TileIndex tile, Owner owner)
 	assert(!IsTileType(tile, MP_INDUSTRY));
 
 	SB(_m[tile].m1, 0, 5, owner);
+	uint8_t owner_add = ((owner&0x3FF)>>5);
+	_me[tile].m9 &= ~(0x1f);
+	_me[tile].m9 |= owner_add&0x1f;
+// 	printf("SetTileOwner: %u: %04X\n", (uint32)tile, owner);
 }
 
 /**

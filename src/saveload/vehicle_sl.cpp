@@ -595,7 +595,7 @@ public:
 		SLE_CONDSSTR(Vehicle, name,                  SLE_STR | SLF_ALLOW_CONTROL,  SLV_84, SL_MAX_VERSION),
 		SLE_CONDVAR(Vehicle, unitnumber,            SLE_FILE_U8  | SLE_VAR_U16,   SL_MIN_VERSION,   SLV_8),
 		SLE_CONDVAR(Vehicle, unitnumber,            SLE_UINT16,                   SLV_8, SL_MAX_VERSION),
-		    SLE_VAR(Vehicle, owner,                 SLE_UINT8),
+		    SLE_VAR(Vehicle, owner,                 SLE_UINT16),
 		SLE_CONDVAR(Vehicle, tile,                  SLE_FILE_U16 | SLE_VAR_U32,   SL_MIN_VERSION,   SLV_6),
 		SLE_CONDVAR(Vehicle, tile,                  SLE_UINT32,                   SLV_6, SL_MAX_VERSION),
 		SLE_CONDVAR(Vehicle, dest_tile,             SLE_FILE_U16 | SLE_VAR_U32,   SL_MIN_VERSION,   SLV_6),
@@ -943,7 +943,7 @@ public:
 		SLE_CONDVAR(Vehicle, z_pos,                 SLE_INT32,                  SLV_164, SL_MAX_VERSION),
 		    SLE_VAR(Vehicle, direction,             SLE_UINT8),
 
-		    SLE_VAR(Vehicle, owner,                 SLE_UINT8),
+		    SLE_VAR(Vehicle, owner,                 SLE_UINT16),
 		    SLE_VAR(Vehicle, vehstatus,             SLE_UINT8),
 		SLE_CONDVAR(Vehicle, current_order.dest,    SLE_FILE_U8 | SLE_VAR_U16,    SL_MIN_VERSION,   SLV_5),
 		SLE_CONDVAR(Vehicle, current_order.dest,    SLE_UINT16,                   SLV_5, SL_MAX_VERSION),

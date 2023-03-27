@@ -34,6 +34,8 @@ struct TileExtended {
 	byte m6;   ///< General purpose
 	byte m7;   ///< Primarily used for newgrf support
 	uint16 m8; ///< General purpose
+	uint8 m9;  ///< Second byte of owner value
+	uint8 m10; ///< Second byte of owner value for special tiles
 };
 
 /**

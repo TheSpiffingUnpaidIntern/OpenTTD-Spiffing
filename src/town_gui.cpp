@@ -54,7 +54,10 @@ static const NWidgetPart _nested_town_authority_widgets[] = {
 		NWidget(WWT_DEFSIZEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, WID_TA_RATING_INFO), SetMinimalSize(317, 92), SetResize(1, 1), EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_BROWN, WID_TA_RATING_INFO), SetScrollbar(WID_TA_RATING_SCROLL), SetMinimalSize(317, 92), SetResize(1, 1), EndContainer(),
+		NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, WID_TA_RATING_SCROLL),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_BROWN, WID_TA_COMMAND_LIST), SetMinimalSize(305, 52), SetResize(1, 0), SetDataTip(0x0, STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP), SetScrollbar(WID_TA_SCROLLBAR), EndContainer(),
 		NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, WID_TA_SCROLLBAR),
@@ -72,6 +75,7 @@ private:
 	Town *town;    ///< Town being displayed.
 	int sel_index; ///< Currently selected town action, \c 0 to \c TACT_COUNT-1, \c -1 means no action selected.
 	Scrollbar *vscroll;
+	Scrollbar *rating_scroll;
 	uint displayed_actions_on_previous_painting; ///< Actions that were available on the previous call to OnPaint()
 
 	/**
@@ -98,8 +102,11 @@ public:
 	TownAuthorityWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc), sel_index(-1), displayed_actions_on_previous_painting(0)
 	{
 		this->town = Town::Get(window_number);
-		this->InitNested(window_number);
+// 		this->InitNested(window_number);
+		this->CreateNestedTree();
 		this->vscroll = this->GetScrollbar(WID_TA_SCROLLBAR);
+		this->rating_scroll = this->GetScrollbar(WID_TA_RATING_SCROLL);
+		this->FinishInitNested(window_number);
 		this->vscroll->SetCapacity((this->GetWidget<NWidgetBase>(WID_TA_COMMAND_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / FONT_HEIGHT_NORMAL);
 	}
 
@@ -119,6 +126,13 @@ public:
 		this->SetWidgetLoweredState(WID_TA_ZONE_BUTTON, this->town->show_zone);
 		this->SetWidgetDisabledState(WID_TA_EXECUTE, this->sel_index == -1);
 
+		int count = 1;
+		for (const Company *c : Company::Iterate()) {
+			if ((this->town->have_ratings.at(c->index) || this->town->exclusivity == c->index)) {
+				count++;
+			}
+		}
+		this->rating_scroll->SetCount(count);
 		this->DrawWidgets();
 		if (!this->IsShaded()) this->DrawRatings();
 	}
@@ -148,10 +162,17 @@ public:
 		uint text_right     = right - (rtl ? icon_width + exclusive_width + 4 : 0);
 		uint icon_left      = rtl ? right - icon_width : left;
 		uint exclusive_left = rtl ? right - icon_width - exclusive_width - 2 : left + icon_width + 2;
-
+		uint count = this->rating_scroll->GetCapacity();
+		uint i = this->rating_scroll->GetPosition();
+		uint current = 0;
 		/* Draw list of companies */
 		for (const Company *c : Company::Iterate()) {
-			if ((HasBit(this->town->have_ratings, c->index) || this->town->exclusivity == c->index)) {
+			if ((this->town->have_ratings.at(c->index) || this->town->exclusivity == c->index)) {
+				if (current < i) {
+					current++;
+					continue;
+				}
+				current++;
 				DrawCompanyIcon(c->index, icon_left, y + icon_y_offset);
 
 				SetDParam(0, c->index);
@@ -174,13 +195,10 @@ public:
 
 				DrawString(text_left, text_right, y, STR_LOCAL_AUTHORITY_COMPANY_RATING);
 				y += FONT_HEIGHT_NORMAL;
+				if (current - i + 1 == count) {
+					break;
+				}
 			}
-		}
-
-		y = y + WD_FRAMERECT_BOTTOM - nwid->pos_y; // Compute needed size of the widget.
-		if (y > nwid->current_y) {
-			/* If the company list is too big to fit, mark ourself dirty and draw again. */
-			ResizeWindow(this, 0, y - nwid->current_y, false);
 		}
 	}
 
@@ -291,6 +309,11 @@ public:
 				Command<CMD_DO_TOWN_ACTION>::Post(STR_ERROR_CAN_T_DO_THIS, this->town->xy, this->window_number, this->sel_index);
 				break;
 		}
+	}
+
+	void OnResize() override
+	{
+		this->rating_scroll->SetCapacityFromWidget(this, WID_TA_RATING_INFO,  WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
 	}
 
 	void OnHundredthTick() override
@@ -726,8 +749,8 @@ private:
 		bool before = !TownDirectoryWindow::last_sorting.order; // Value to get 'a' before 'b'.
 
 		/* Towns without rating are always after towns with rating. */
-		if (HasBit(a->have_ratings, _local_company)) {
-			if (HasBit(b->have_ratings, _local_company)) {
+		if (a->have_ratings.at(_local_company)) {
+			if (b->have_ratings.at(_local_company)) {
 				int16 a_rating = a->ratings[_local_company];
 				int16 b_rating = b->ratings[_local_company];
 				if (a_rating == b_rating) return TownDirectoryWindow::TownNameSorter(a, b);
@@ -735,7 +758,7 @@ private:
 			}
 			return before;
 		}
-		if (HasBit(b->have_ratings, _local_company)) return !before;
+		if (b->have_ratings.at(_local_company)) return !before;
 
 		/* Sort unrated towns always on ascending town name. */
 		if (before) return TownDirectoryWindow::TownNameSorter(a, b);
@@ -810,7 +833,7 @@ public:
 					assert(t->xy != INVALID_TILE);
 
 					/* Draw rating icon. */
-					if (_game_mode == GM_EDITOR || !HasBit(t->have_ratings, _local_company)) {
+					if (_game_mode == GM_EDITOR || !t->have_ratings.at(_local_company)) {
 						DrawSprite(SPR_TOWN_RATING_NA, PAL_NONE, icon_x, y + (this->resize.step_height - icon_size.height) / 2);
 					} else {
 						SpriteID icon = SPR_TOWN_RATING_APALLING;

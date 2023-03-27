@@ -28,7 +28,6 @@ void ScriptConfig::Change(const char *name, int version, bool force_exact_match,
 	if (this->config_list != nullptr) this->PushExtraConfigList();
 
 	this->ClearConfigList();
-
 	if (_game_mode == GM_NORMAL && this->info != nullptr) {
 		/* If we're in an existing game and the Script is changed, set all settings
 		 *  for the Script that have the random flag to a random value. */

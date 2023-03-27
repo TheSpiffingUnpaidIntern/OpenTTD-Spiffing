@@ -61,7 +61,7 @@ void Blitter_32bppSSE2_Anim::PaletteAnimate(const Palette &palette)
 					/* slow path: < 8 pixels left or unexpected brightnesses */
 					for (int z = std::min<int>(x, 8); z != 0 ; z--) {
 						int value = _mm_extract_epi16(data, 0);
-						uint8 colour = GB(value, 0, 8);
+						uint16 colour = GB(value, 0, 8);
 						if (colour >= PALETTE_ANIM_START) {
 							/* Update this pixel */
 							*dst = AdjustBrightneSSE(LookupColourInPalette(colour), GB(value, 8, 8));

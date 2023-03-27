@@ -713,7 +713,7 @@ static CommandCost BuildStationPart(Station **st, DoCommandFlag flags, bool reus
 			(*st)->string_id = GenerateStationName(*st, area.tile, name_class);
 
 			if (Company::IsValidID(_current_company)) {
-				SetBit((*st)->town->have_ratings, _current_company);
+				(*st)->town->have_ratings.set(_current_company);
 			}
 		}
 	}
@@ -3502,7 +3502,7 @@ static void UpdateStationRating(Station *st)
 				if (ge->max_waiting_cargo <= 100) rating += 10;
 			}
 
-			if (Company::IsValidID(st->owner) && HasBit(st->town->statues, st->owner)) rating += 26;
+			if (Company::IsValidID(st->owner) && st->town->statues.at(st->owner)) rating += 26;
 
 			byte age = ge->last_age;
 			if (age < 3) rating += 10;
@@ -4195,6 +4195,7 @@ static void ChangeTileOwner_Station(TileIndex tile, Owner old_owner, Owner new_o
 		}
 
 		/* for buoys, owner of tile is owner of water, st->owner == OWNER_NONE */
+		printf("Station SetTileOwner %u %04X %04X\n",(uint32)tile, old_owner, new_owner);
 		SetTileOwner(tile, new_owner);
 		InvalidateWindowClassesData(WC_STATION_LIST, 0);
 	} else {

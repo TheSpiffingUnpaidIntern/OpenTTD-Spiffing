@@ -212,7 +212,7 @@ std::string GenerateCompanyPasswordHash(const std::string &password, const std::
  */
 bool NetworkCompanyIsPassworded(CompanyID company_id)
 {
-	return HasBit(_network_company_passworded, company_id);
+	return _network_company_passworded.at(company_id);
 }
 
 /* This puts a text-message to the console, or in the future, the chat-box,
@@ -897,7 +897,7 @@ bool NetworkServerStart()
 	_network_own_client_id = CLIENT_ID_SERVER;
 
 	_network_clients_connected = 0;
-	_network_company_passworded = 0;
+	_network_company_passworded.reset();
 
 	NetworkInitGameInfo();
 

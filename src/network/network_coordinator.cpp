@@ -242,7 +242,6 @@ bool ClientNetworkCoordinatorSocketHandler::Receive_GC_LISTING(Packet *p)
 
 	for (; servers > 0; servers--) {
 		std::string connection_string = p->Recv_string(NETWORK_HOSTNAME_PORT_LENGTH);
-
 		/* Read the NetworkGameInfo from the packet. */
 		NetworkGameInfo ngi = {};
 		DeserializeNetworkGameInfo(p, &ngi, &this->newgrf_lookup_table);

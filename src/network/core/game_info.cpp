@@ -89,6 +89,7 @@ static std::string_view ExtractNetworkRevisionHash(std::string_view revision_str
  */
 bool IsNetworkCompatibleVersion(std::string_view other)
 {
+// 	auto this_one = GetNetworkRevisionString();
 	if (GetNetworkRevisionString() == other) return true;
 
 	/* If this version is tagged, then the revision string must be a complete match,
@@ -147,7 +148,7 @@ const NetworkServerGameInfo *GetCurrentNetworkServerGameInfo()
 	 *  - invite_code
 	 * These don't need to be updated manually here.
 	 */
-	_network_game_info.companies_on  = (byte)Company::GetNumItems();
+	_network_game_info.companies_on  = Company::GetNumItems();
 	_network_game_info.spectators_on = NetworkSpectatorCount();
 	_network_game_info.game_date     = _date;
 	return &_network_game_info;
@@ -231,17 +232,17 @@ void SerializeNetworkGameInfo(Packet *p, const NetworkServerGameInfo *info, bool
 	p->Send_uint32(info->start_date);
 
 	/* NETWORK_GAME_INFO_VERSION = 2 */
-	p->Send_uint8 (info->companies_max);
-	p->Send_uint8 (info->companies_on);
-	p->Send_uint8 (info->clients_max); // Used to be max-spectators
+	p->Send_uint16(info->companies_max);
+	p->Send_uint16(info->companies_on);
+	p->Send_uint16(info->clients_max); // Used to be max-spectators
 
 	/* NETWORK_GAME_INFO_VERSION = 1 */
 	p->Send_string(info->server_name);
 	p->Send_string(info->server_revision);
 	p->Send_bool  (info->use_password);
-	p->Send_uint8 (info->clients_max);
-	p->Send_uint8 (info->clients_on);
-	p->Send_uint8 (info->spectators_on);
+	p->Send_uint16(info->clients_max);
+	p->Send_uint16(info->clients_on);
+	p->Send_uint16(info->spectators_on);
 	p->Send_uint16(info->map_width);
 	p->Send_uint16(info->map_height);
 	p->Send_uint8 (info->landscape);
@@ -267,7 +268,6 @@ void DeserializeNetworkGameInfo(Packet *p, NetworkGameInfo *info, const GameInfo
 
 	/* Update the documentation in game_info.h on changes
 	 * to the NetworkGameInfo wire-protocol! */
-
 	switch (game_info_version) {
 		case 6:
 			newgrf_serialisation = (NewGRFSerializationType)p->Recv_uint8();
@@ -328,9 +328,9 @@ void DeserializeNetworkGameInfo(Packet *p, NetworkGameInfo *info, const GameInfo
 			FALLTHROUGH;
 
 		case 2:
-			info->companies_max  = p->Recv_uint8 ();
-			info->companies_on   = p->Recv_uint8 ();
-			p->Recv_uint8(); // Used to contain max-spectators.
+			info->companies_max  = p->Recv_uint16();
+			info->companies_on   = p->Recv_uint16();
+			p->Recv_uint16(); // Used to contain max-spectators.
 			FALLTHROUGH;
 
 		case 1:
@@ -338,9 +338,9 @@ void DeserializeNetworkGameInfo(Packet *p, NetworkGameInfo *info, const GameInfo
 			info->server_revision = p->Recv_string(NETWORK_REVISION_LENGTH);
 			if (game_info_version < 6) p->Recv_uint8 (); // Used to contain server-lang.
 			info->use_password   = p->Recv_bool  ();
-			info->clients_max    = p->Recv_uint8 ();
-			info->clients_on     = p->Recv_uint8 ();
-			info->spectators_on  = p->Recv_uint8 ();
+			info->clients_max    = p->Recv_uint16();
+			info->clients_on     = p->Recv_uint16();
+			info->spectators_on  = p->Recv_uint16();
 			if (game_info_version < 3) { // 16 bits dates got scrapped and are read earlier
 				info->game_date    = p->Recv_uint16() + DAYS_TILL_ORIGINAL_BASE_YEAR;
 				info->start_date   = p->Recv_uint16() + DAYS_TILL_ORIGINAL_BASE_YEAR;

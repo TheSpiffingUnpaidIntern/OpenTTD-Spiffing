@@ -11,28 +11,31 @@
 #define COMPANY_TYPE_H
 
 #include "core/enum_type.hpp"
+#include "core/bitmath_func.hpp"
 
 /**
  * Enum for all companies/owners.
  */
-enum Owner : byte {
+enum Owner : uint16 {
 	/* All companies below MAX_COMPANIES are playable
 	 * companies, above, they are special, computer controlled 'companies' */
 	OWNER_BEGIN     = 0x00, ///< First owner
 	COMPANY_FIRST   = 0x00, ///< First company, same as owner
-	MAX_COMPANIES   = 0x0F, ///< Maximum number of companies
-	OWNER_TOWN      = 0x0F, ///< A town owns the tile, or a town is expanding
-	OWNER_NONE      = 0x10, ///< The tile has no ownership
-	OWNER_WATER     = 0x11, ///< The tile/execution is done by "water"
-	OWNER_DEITY     = 0x12, ///< The object is owned by a superuser / goal script
+	MAX_COMPANIES   = 0x1F5, ///< Maximum number of companies
+	OLD_MAX_COMPANIES   = 0x0F, ///< Maximum number of companies
+	OWNER_TOWN      = 0x20F, ///< A town owns the tile, or a town is expanding
+	OLD_OWNER_TOWN      = 0x0F,
+	OWNER_NONE      = 0x210, ///< The tile has no ownership
+	OWNER_WATER     = 0x211, ///< The tile/execution is done by "water"
+	OWNER_DEITY     = 0x212, ///< The object is owned by a superuser / goal script
 	OWNER_END,              ///< Last + 1 owner
-	INVALID_OWNER   = 0xFF, ///< An invalid owner
-	INVALID_COMPANY = 0xFF, ///< An invalid company
+	INVALID_OWNER   = 0x2FF, ///< An invalid owner
+	INVALID_COMPANY = 0x2FF, ///< An invalid company
 
 	/* 'Fake' companies used for networks */
-	COMPANY_INACTIVE_CLIENT = 253, ///< The client is joining
-	COMPANY_NEW_COMPANY     = 254, ///< The client wants a new company
-	COMPANY_SPECTATOR       = 255, ///< The client is spectating
+	COMPANY_INACTIVE_CLIENT = 0x2FD, ///< The client is joining
+	COMPANY_NEW_COMPANY     = 0x2FE, ///< The client wants a new company
+	COMPANY_SPECTATOR       = 0x2FF, ///< The client is spectating
 };
 DECLARE_POSTFIX_INCREMENT(Owner)
 
@@ -43,11 +46,11 @@ static const uint MAX_HISTORY_QUARTERS            = 24; ///< The maximum number 
 static const uint MAX_COMPANY_SHARE_OWNERS        =  4; ///< The maximum number of shares of a company that can be owned by another company.
 
 /** Define basic enum properties */
-template <> struct EnumPropsT<Owner> : MakeEnumPropsT<Owner, byte, OWNER_BEGIN, OWNER_END, INVALID_OWNER> {};
+template <> struct EnumPropsT<Owner> : MakeEnumPropsT<Owner, uint16, OWNER_BEGIN, OWNER_END, INVALID_OWNER> {};
 
 typedef Owner CompanyID;
 
-typedef uint16 CompanyMask;
+typedef Bitset<MAX_COMPANIES> CompanyMask;
 
 struct Company;
 typedef uint32 CompanyManagerFace; ///< Company manager face bits, info see in company_manager_face.h

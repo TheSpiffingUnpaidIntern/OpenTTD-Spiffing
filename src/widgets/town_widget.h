@@ -25,6 +25,7 @@ enum TownAuthorityWidgets {
 	WID_TA_CAPTION,      ///< Caption of window.
 	WID_TA_ZONE_BUTTON,  ///< Turn on/off showing local authority zone.
 	WID_TA_RATING_INFO,  ///< Overview with ratings for each company.
+	WID_TA_RATING_SCROLL,
 	WID_TA_COMMAND_LIST, ///< List of commands for the player.
 	WID_TA_SCROLLBAR,    ///< Scrollbar of the list of commands.
 	WID_TA_ACTION_INFO,  ///< Additional information about the action.

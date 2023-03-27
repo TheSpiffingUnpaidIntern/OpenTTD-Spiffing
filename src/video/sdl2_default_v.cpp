@@ -42,7 +42,8 @@ static SDL_Palette *_sdl_palette;
 
 void VideoDriver_SDL_Default::UpdatePalette()
 {
-	SDL_Color pal[256];
+	printf("VideoDriver_SDL_Default::UpdatePalette\n");
+	SDL_Color pal[1000];
 
 	for (int i = 0; i != this->local_palette.count_dirty; i++) {
 		pal[i].r = this->local_palette.palette[this->local_palette.first_dirty + i].r;
@@ -57,8 +58,9 @@ void VideoDriver_SDL_Default::UpdatePalette()
 
 void VideoDriver_SDL_Default::MakePalette()
 {
+	printf("VideoDriver_SDL_Default::MakePalette\n");
 	if (_sdl_palette == nullptr) {
-		_sdl_palette = SDL_AllocPalette(256);
+		_sdl_palette = SDL_AllocPalette(1000);
 		if (_sdl_palette == nullptr) usererror("SDL2: Couldn't allocate palette: %s", SDL_GetError());
 	}
 
