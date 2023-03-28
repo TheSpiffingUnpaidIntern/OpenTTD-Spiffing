@@ -101,6 +101,8 @@ Economy _economy;
 Prices _price;
 static PriceMultipliers _price_base_multiplier;
 
+extern int GetAmountOwnedBy(const Company *c, Owner owner);
+
 /**
  * Calculate the value of the company. That is the value of all
  * assets (vehicles, stations, shares) and money minus the loan,
@@ -115,18 +117,12 @@ Money CalculateCompanyValue(const Company *c, bool including_loan)
 	Money owned_shares_value = 0;
 
 	for (const Company *co : Company::Iterate()) {
-		uint8 shares_owned = 0;
+		int shares_owned = GetAmountOwnedBy(co, c->index);
 
-		for (uint8 i = 0; i < 4; i++) {
-			if (co->share_owners[i] == c->index) {
-				shares_owned++;
-			}
-		}
-
-		owned_shares_value += (CalculateCompanyValueExcludingShares(co) / 4) * shares_owned;
+		if (shares_owned > 0) owned_shares_value += (CalculateCompanyValueExcludingShares(co) / 4) * shares_owned;
 	}
 
-	return std::max<Money>(owned_shares_value + CalculateCompanyValueExcludingShares(c), 1);
+	return owned_shares_value + CalculateCompanyValueExcludingShares(c);
 }
 
 Money CalculateCompanyValueExcludingShares(const Company *c, bool including_loan)
@@ -762,8 +758,8 @@ bool AddInflation(bool check_year)
  */
 void RecomputePrices()
 {
-	/* Setup maximum loan */
-	_economy.max_loan = ((uint64)_settings_game.difficulty.max_loan * _economy.inflation_prices >> 16) / 50000 * 50000;
+	/* Setup maximum loan as a rounded down multiple of LOAN_INTERVAL. */
+	_economy.max_loan = ((uint64)_settings_game.difficulty.max_loan * _economy.inflation_prices >> 16) / LOAN_INTERVAL * LOAN_INTERVAL;
 
 	/* Setup price bases */
 	for (Price i = PR_BEGIN; i < PR_END; i++) {
@@ -1499,7 +1495,7 @@ static void HandleStationRefit(Vehicle *v, CargoArray &consist_capleft, Station 
 			if (st->goods[cid].cargo.HasCargoFor(next_station)) {
 				/* Try to find out if auto-refitting would succeed. In case the refit is allowed,
 				 * the returned refit capacity will be greater than zero. */
-				auto [cc, refit_capacity, mail_capacity] = Command<CMD_REFIT_VEHICLE>::Do(DC_QUERY_COST, v_start->index, cid, 0xFF, true, false, 1); // Auto-refit and only this vehicle including artic parts.
+				auto [cc, refit_capacity, mail_capacity, cargo_capacities] = Command<CMD_REFIT_VEHICLE>::Do(DC_QUERY_COST, v_start->index, cid, 0xFF, true, false, 1); // Auto-refit and only this vehicle including artic parts.
 				/* Try to balance different loadable cargoes between parts of the consist, so that
 				 * all of them can be loaded. Avoid a situation where all vehicles suddenly switch
 				 * to the first loadable cargo for which there is only one packet. If the capacities
@@ -2018,8 +2014,6 @@ static void DoAcquireCompany(Company *c)
 
 	delete c;
 }
-
-extern int GetAmountOwnedBy(const Company *c, Owner owner);
 
 /**
  * Acquire shares in an opposing company.
