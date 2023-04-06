@@ -205,6 +205,14 @@ static inline void SetTileOwner(TileIndex tile, Owner owner)
 	uint8_t owner_add = ((owner&0x3FF)>>5);
 	_me[tile].m9 &= ~(0x1f);
 	_me[tile].m9 |= owner_add&0x1f;
+	if (owner == OWNER_NONE) {
+		_me[tile].m9 &= ~(0xe0);
+		_me[tile].m9 |= (owner_add&0x1f)<<5;
+		_me[tile].m10 &= ~(0x03);
+		_me[tile].m10 |= (owner_add&0x1f)>>3;
+		_me[tile].m10 &= ~(0xFC);
+		_me[tile].m10 |= (owner_add&0x1f)<<2;
+	}
 // 	printf("SetTileOwner: %u: %04X\n", (uint32)tile, owner);
 }
 
