@@ -233,6 +233,9 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 
 			if (_local_company != COMPANY_SPECTATOR) {
 				list.emplace_back(new DropDownListStringItem(STR_NETWORK_COMPANY_LIST_SPECTATE, CTMN_SPECTATE, false));
+
+				list.emplace_back(new DropDownListCompanyItem(_local_company, false, HasBit(grey, _local_company)));
+				list.emplace_back(new DropDownListStringItem(STR_EMPTY, INVALID_COMPANY, true));
 			}
 			break;
 		case WID_TN_STORY:
@@ -242,14 +245,25 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 		case WID_TN_GOAL:
 			list.emplace_back(new DropDownListStringItem(STR_GOALS_SPECTATOR, CTMN_SPECTATOR, false));
 			break;
+		default: {
+			if (_local_company != COMPANY_SPECTATOR) {
+				list.emplace_back(new DropDownListCompanyItem(_local_company, false, HasBit(grey, _local_company)));
+				list.emplace_back(new DropDownListStringItem(STR_EMPTY, -1, true));
+			}
+			break;
+		}
 	}
 
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
 		if (!Company::IsValidID(c)) continue;
+		if (c == _local_company) continue;
 		list.emplace_back(new DropDownListCompanyItem(c, false, HasBit(grey, c)));
 	}
 
-	PopupMainToolbMenu(w, widget, std::move(list), _local_company == COMPANY_SPECTATOR ? (widget == WID_TN_COMPANIES ? CTMN_CLIENT_LIST : CTMN_SPECTATOR) : (int)_local_company);
+	ShowDropDownList(w, std::move(list),
+					 (_local_company == COMPANY_SPECTATOR ? (widget == WID_TN_COMPANIES ? CTMN_CLIENT_LIST : CTMN_SPECTATOR) : (int)_local_company),
+					 widget, 0, true, false);
+	if (_settings_client.sound.click_beep) SndPlayFx(SND_15_BEEP);
 }
 
 static ToolbarMode _toolbar_mode;
