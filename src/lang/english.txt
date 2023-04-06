@@ -5625,3 +5625,7 @@ STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
 STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELOCITY})
+
+STR_WHITE_RAW_STRING                                            :{WHITE}{RAW_STRING}
+STR_ANNOUNCEMENT_CAPTION                                        :{WHITE}Server Announcement
+STR_ANNOUNCEMENT_TEXT                                           :{WHITE}{RAW_STRING}

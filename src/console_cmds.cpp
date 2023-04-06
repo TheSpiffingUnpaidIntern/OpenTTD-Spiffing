@@ -2539,6 +2539,28 @@ DEF_CONSOLE_CMD(ConDumpInfo)
 	return false;
 }
 
+DEF_CONSOLE_CMD(ConAnnounce)
+{
+	if (!_network_server) {
+		IConsolePrint(CC_ERROR, "Only the server can send announcement message.");
+		return true;
+	}
+
+	if (argc != 2) {
+		IConsolePrint(CC_HELP, "Send server announcement.");
+		IConsolePrint(CC_HELP, "Usage: 'announce <message>'.");
+		return true;
+	}
+
+	std::string message;
+
+	message = argv[1];
+
+	Command<CMD_ANNOUNCE>::Post(message);
+
+	return true;
+}
+
 /*******************************
  * console command registration
  *******************************/
@@ -2679,4 +2701,6 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("newgrf_profile",          ConNewGRFProfile,    ConHookNewGRFDeveloperTool);
 
 	IConsole::CmdRegister("dump_info",               ConDumpInfo);
+
+	IConsole::CmdRegister("announce",                ConAnnounce,            ConHookServerOnly);
 }

@@ -22,6 +22,7 @@
 #include "texteff.hpp"
 #include "core/backup_type.hpp"
 #include "misc_cmd.h"
+#include "error.h"
 
 #include "table/strings.h"
 
@@ -224,4 +225,14 @@ CommandCost CmdChangeBankBalance(DoCommandFlag flags, TileIndex tile, Money delt
 	/* This command doesn't cost anything for deity. */
 	CommandCost zero_cost(expenses_type, 0);
 	return zero_cost;
+}
+
+CommandCost CmdAnnounce(DoCommandFlag, const std::string &message)
+{
+	if (_network_server) {
+		return CommandCost(); // no need to push the message to ourselves
+	}
+	SetDParamStr(0, message);
+	ShowErrorMessage(STR_ANNOUNCEMENT_CAPTION, STR_ANNOUNCEMENT_TEXT, WL_INFO);
+	return CommandCost();
 }
