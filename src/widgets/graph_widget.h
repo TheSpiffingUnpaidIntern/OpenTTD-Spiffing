@@ -16,6 +16,9 @@
 /** Widgets of the #GraphLegendWindow class. */
 enum GraphLegendWidgets {
 	WID_GL_BACKGROUND,    ///< Background of the window.
+	WID_GL_SCROLLBAR,
+	WID_GL_COMPANIES_ALL,
+	WID_GL_COMPANIES_NONE,
 
 	WID_GL_FIRST_COMPANY, ///< First company in the legend.
 	WID_GL_LAST_COMPANY = WID_GL_FIRST_COMPANY + MAX_COMPANIES - 1, ///< Last company in the legend.
