@@ -2048,7 +2048,13 @@ public:
 
 				SetDParam(0, company_id);
 				SetDParam(1, company_id);
-				DrawString(tr.left, tr.right, y + text_y_offset, STR_COMPANY_NAME, TC_SILVER);
+				SetDParam(2, company_id);
+				std::string res = GetString(STR_COMPANY_NAME_COMPANY_NUM);
+				if (!Company::IsHumanID(company_id)) {
+					res += "(AI " + std::to_string(company_id+1) + ")";
+				}
+				SetDParamStr(0, res);
+				DrawString(tr.left, tr.right, y + text_y_offset, STR_JUST_RAW_STRING, TC_SILVER);
 			}
 		}
 
@@ -2082,8 +2088,8 @@ public:
 					DrawSprite(player_icon, PALETTE_TO_GREY, rtl ? tr.right - d2.width : tr.left, y + offset_y);
 					tr = tr.Indent(d2.width + WidgetDimensions::scaled.hsep_normal, rtl);
 				}
-
-				SetDParamStr(0, ci->client_name);
+				std::string result_string = ci->client_name + " (Client " + std::to_string(ci->client_id) + ")";
+				SetDParamStr(0, result_string);
 				DrawString(tr.left, tr.right, y + text_y_offset, STR_JUST_RAW_STRING, TC_BLACK);
 			}
 
