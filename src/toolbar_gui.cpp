@@ -176,7 +176,12 @@ public:
 			col = sel ? TC_WHITE : TC_BLACK;
 		}
 		tr = tr.Indent(this->icon_size.width + WidgetDimensions::scaled.hsep_normal, rtl).Indent(this->lock_size.width + WidgetDimensions::scaled.hsep_normal, !rtl);
-		DrawString(tr.left, tr.right, text_y, STR_COMPANY_NAME_COMPANY_NUM, col);
+		std::string res = GetString(STR_COMPANY_NAME_COMPANY_NUM);
+		if (!Company::IsHumanID(company)) {
+			res += "(AI " + std::to_string(company+1) + ")";
+		}
+		SetDParamStr(0, res);
+		DrawString(tr.left, tr.right, text_y, STR_JUST_RAW_STRING, col);
 	}
 };
 
@@ -220,7 +225,7 @@ static const int CTMN_SPECTATOR   = -3; ///< Show a company window as spectator
  * @param widget The button widget id.
  * @param grey A bitbask of which items to mark as disabled.
  */
-static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
+static void PopupMainCompanyToolbMenu(Window *w, int widget, CompanyMask grey = CompanyMask())
 {
 	DropDownList list;
 
@@ -234,7 +239,7 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 			if (_local_company != COMPANY_SPECTATOR) {
 				list.emplace_back(new DropDownListStringItem(STR_NETWORK_COMPANY_LIST_SPECTATE, CTMN_SPECTATE, false));
 
-				list.emplace_back(new DropDownListCompanyItem(_local_company, false, HasBit(grey, _local_company)));
+				list.emplace_back(new DropDownListCompanyItem(_local_company, false, grey.at( _local_company)));
 				list.emplace_back(new DropDownListStringItem(STR_EMPTY, INVALID_COMPANY, true));
 			}
 			break;
@@ -247,7 +252,7 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 			break;
 		default: {
 			if (_local_company != COMPANY_SPECTATOR) {
-				list.emplace_back(new DropDownListCompanyItem(_local_company, false, HasBit(grey, _local_company)));
+				list.emplace_back(new DropDownListCompanyItem(_local_company, false, grey.at(_local_company)));
 				list.emplace_back(new DropDownListStringItem(STR_EMPTY, -1, true));
 			}
 			break;
@@ -257,7 +262,7 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
 		if (!Company::IsValidID(c)) continue;
 		if (c == _local_company) continue;
-		list.emplace_back(new DropDownListCompanyItem(c, false, HasBit(grey, c)));
+		list.emplace_back(new DropDownListCompanyItem(c, false, grey.at(c)));
 	}
 
 	ShowDropDownList(w, std::move(list),
@@ -615,7 +620,7 @@ static CallBackFunction MenuClickFinances(int index)
 
 static CallBackFunction ToolbarCompaniesClick(Window *w)
 {
-	PopupMainCompanyToolbMenu(w, WID_TN_COMPANIES, 0);
+	PopupMainCompanyToolbMenu(w, WID_TN_COMPANIES);
 	return CBF_NONE;
 }
 
@@ -651,7 +656,7 @@ static CallBackFunction MenuClickCompany(int index)
 
 static CallBackFunction ToolbarStoryClick(Window *w)
 {
-	PopupMainCompanyToolbMenu(w, WID_TN_STORY, 0);
+	PopupMainCompanyToolbMenu(w, WID_TN_STORY);
 	return CBF_NONE;
 }
 
@@ -671,7 +676,7 @@ static CallBackFunction MenuClickStory(int index)
 
 static CallBackFunction ToolbarGoalClick(Window *w)
 {
-	PopupMainCompanyToolbMenu(w, WID_TN_GOAL, 0);
+	PopupMainCompanyToolbMenu(w, WID_TN_GOAL);
 	return CBF_NONE;
 }
 
@@ -807,10 +812,11 @@ static CallBackFunction MenuClickIndustry(int index)
 
 static void ToolbarVehicleClick(Window *w, VehicleType veh)
 {
-	int dis = ~0;
+	CompanyMask dis;
+	dis.set();
 
 	for (const Vehicle *v : Vehicle::Iterate()) {
-		if (v->type == veh && v->IsPrimaryVehicle()) ClrBit(dis, v->owner);
+		if (v->type == veh && v->IsPrimaryVehicle()) dis.reset(v->owner);
 	}
 	PopupMainCompanyToolbMenu(w, WID_TN_VEHICLE_START + veh, dis);
 }
