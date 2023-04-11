@@ -26,7 +26,7 @@ CommandCost CmdChangeBankBalance(DoCommandFlag flags, TileIndex tile, Money delt
 CommandCost CmdIncreaseLoan(DoCommandFlag flags, LoanCommand cmd, Money amount);
 CommandCost CmdDecreaseLoan(DoCommandFlag flags, LoanCommand cmd, Money amount);
 CommandCost CmdPause(DoCommandFlag flags, PauseMode mode, bool pause);
-CommandCost CmdAnnounce(DoCommandFlag flags, const std::string &message);
+CommandCost CmdAnnounce(DoCommandFlag flags, const std::string &message, CompanyID target_company = INVALID_COMPANY);
 
 DEF_CMD_TRAIT(CMD_MONEY_CHEAT,         CmdMoneyCheat,        CMD_OFFLINE,             CMDT_CHEAT)
 DEF_CMD_TRAIT(CMD_CHANGE_BANK_BALANCE, CmdChangeBankBalance, CMD_DEITY,               CMDT_MONEY_MANAGEMENT)

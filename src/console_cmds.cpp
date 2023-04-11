@@ -2556,7 +2556,7 @@ DEF_CONSOLE_CMD(ConAnnounce)
 
 	message = argv[1];
 
-	Command<CMD_ANNOUNCE>::Post(message);
+	Command<CMD_ANNOUNCE>::Post(message, INVALID_COMPANY);
 
 	return true;
 }

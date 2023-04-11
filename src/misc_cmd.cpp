@@ -227,10 +227,13 @@ CommandCost CmdChangeBankBalance(DoCommandFlag flags, TileIndex tile, Money delt
 	return zero_cost;
 }
 
-CommandCost CmdAnnounce(DoCommandFlag, const std::string &message)
+CommandCost CmdAnnounce(DoCommandFlag, const std::string &message, CompanyID target_company)
 {
 	if (_network_server) {
 		return CommandCost(); // no need to push the message to ourselves
+	}
+	if (target_company != INVALID_COMPANY && target_company != _local_company) {
+		return CommandCost();
 	}
 	SetDParamStr(0, message);
 	ShowErrorMessage(STR_ANNOUNCEMENT_CAPTION, STR_ANNOUNCEMENT_TEXT, WL_INFO);
