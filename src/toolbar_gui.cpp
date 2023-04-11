@@ -231,7 +231,11 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, CompanyMask grey = 
 
 	switch (widget) {
 		case WID_TN_COMPANIES:
-			if (!_networking) break;
+			if (!_networking) {
+				list.emplace_back(new DropDownListCompanyItem(_local_company, false, grey.at(_local_company)));
+				list.emplace_back(new DropDownListStringItem(STR_EMPTY, -1, true));
+				break;
+			}
 
 			/* Add the client list button for the companies menu */
 			list.emplace_back(new DropDownListStringItem(STR_NETWORK_COMPANY_LIST_CLIENT_LIST, CTMN_CLIENT_LIST, false));
