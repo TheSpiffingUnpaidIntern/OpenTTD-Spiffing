@@ -292,8 +292,16 @@ void GetNameOfOwner(Owner owner, TileIndex tile)
 		if (!Company::IsValidID(owner)) {
 			SetDParam(0, STR_COMPANY_SOMEONE);
 		} else {
-			SetDParam(0, STR_COMPANY_NAME);
+			SetDParam(0, owner);
 			SetDParam(1, owner);
+			SetDParam(2, owner);
+			static std::string res;
+			res = GetString(STR_COMPANY_NAME_COMPANY_NUM);
+			if (!Company::IsHumanID(owner)) {
+				res += "(AI " + std::to_string(owner+1) + ")";
+			}
+			SetDParam(0, STR_JUST_RAW_STRING);
+			SetDParamStr(1, res);
 		}
 	} else {
 		assert(tile != 0);
