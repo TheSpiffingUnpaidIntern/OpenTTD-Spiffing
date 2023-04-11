@@ -34,7 +34,7 @@ struct VehicleListIdentifier {
 
 	uint64 Pack() const;
 	bool UnpackIfValid(uint64 data);
-	static VehicleListIdentifier UnPack(uint32 data);
+	static VehicleListIdentifier UnPack(uint64 data);
 
 	bool Valid() const { return this->type < VLT_END; }
 

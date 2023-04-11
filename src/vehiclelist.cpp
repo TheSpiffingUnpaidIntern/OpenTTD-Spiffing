@@ -36,7 +36,7 @@ uint64 VehicleListIdentifier::Pack() const
  */
 bool VehicleListIdentifier::UnpackIfValid(uint64 data)
 {
-	uint16 c      = GB(data, 28, 8);
+	uint16 c      = GB(data, 28, 16);
 	this->company = (CompanyID)c;
 	this->type    = (VehicleListType)GB(data, 23, 3);
 	this->vtype   = (VehicleType)GB(data, 26, 2);
@@ -49,7 +49,7 @@ bool VehicleListIdentifier::UnpackIfValid(uint64 data)
  * Decode a packed vehicle list identifier into a new one.
  * @param data The data to unpack.
  */
-/* static */ VehicleListIdentifier VehicleListIdentifier::UnPack(uint32 data)
+/* static */ VehicleListIdentifier VehicleListIdentifier::UnPack(uint64 data)
 {
 	VehicleListIdentifier result;
 	[[maybe_unused]] bool ret = result.UnpackIfValid(data);
