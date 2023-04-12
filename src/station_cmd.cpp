@@ -4197,7 +4197,6 @@ static void ChangeTileOwner_Station(TileIndex tile, Owner old_owner, Owner new_o
 		}
 
 		/* for buoys, owner of tile is owner of water, st->owner == OWNER_NONE */
-		printf("Station SetTileOwner %u %04X %04X\n",(uint32)tile, old_owner, new_owner);
 		SetTileOwner(tile, new_owner);
 		InvalidateWindowClassesData(WC_STATION_LIST, 0);
 	} else {

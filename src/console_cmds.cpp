@@ -1268,7 +1268,7 @@ DEF_CONSOLE_CMD(ConStartAI)
 	}
 
 	int n = 0;
-	for (int i = 0; i < number; i++) {
+	for (uint32 i = 0; i < number; i++) {
 		/* Find the next free slot */
 		bool found = false;
 		do {

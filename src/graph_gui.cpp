@@ -1332,7 +1332,6 @@ struct PerformanceRatingDetailWindow : Window {
 			int total_selection = 8;
 			sprite_size.width = std::max(sprite_size.width, uint(xsize/total_selection));
 			for (int index = pos*total_selection; index < max*total_selection; index++) {
-// 			for (const CargoSpec *cs : _sorted_standard_cargo_specs) {
 				if (index >= MAX_COMPANIES) {
 					GfxFillRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, _colour_gradient[COLOUR_BROWN][3]);
 					x += sprite_size.width;
@@ -1351,11 +1350,9 @@ struct PerformanceRatingDetailWindow : Window {
 					}
 					continue;
 				}
-// 				if (pos-- > 0) continue;
-// 				if (--max < 0) break;
 
 				CompanyID cid = (CompanyID)(index);
-				bool lowered = (cid == this->company); //!HasBit(_legend_excluded_cargo, cs->Index());
+				bool lowered = (cid == this->company);
 				int offset = (cid == this->company) ? 1 : 0;
 
 				if (lowered) {
@@ -1363,15 +1360,7 @@ struct PerformanceRatingDetailWindow : Window {
 				} else {
 					DrawFrameRect(x, y, x + sprite_size.width, y + sprite_size.height - 1, COLOUR_BROWN, FR_NONE);
 				}
-// 				byte clk_dif = lowered ? 1 : 0;
-// 				int rect_x = clk_dif + (rtl ? r.right - this->legend_width - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT);
-
-// 				GfxFillRect(rect_x, y + padding + clk_dif, rect_x + this->legend_width, y + row_height - 1 + clk_dif, PC_BLACK);
-// 				GfxFillRect(rect_x + 1, y + padding + 1 + clk_dif, rect_x + this->legend_width - 1, y + row_height - 2 + clk_dif, cs->legend_colour);
-// 				SetDParam(0, cs->name);
 				DrawCompanyIcon(cid, x + (sprite_size.width - orig_width)/2 + offset, y + (sprite_size.height - orig_height)/2 + offset);
-// 				(x + x+sprite_size.width - sprite_size.width)/2
-// 				DrawString(rtl ? r.left : x + this->legend_width + 4 + clk_dif, (rtl ? r.right - this->legend_width - 4 + clk_dif : r.right), y + clk_dif, STR_GRAPH_CARGO_PAYMENT_CARGO);
 				x += sprite_size.width;
 				if (x >= total_selection*sprite_size.width) {
 					x = r.left;
@@ -1540,7 +1529,6 @@ static NWidgetBase *MakePerformanceDetailPanels(int *biggest_index)
 	NWidgetVertical *vert = new NWidgetVertical(NC_EQUALSIZE);
 	NWidgetBackground *panel = new NWidgetBackground(WWT_PANEL, COLOUR_BROWN, WID_PRD_COMPANY_NAME);
 	panel->SetFill(1, 1);
-// 	panel->SetDataTip(0x0, performance_tips[widnum - WID_PRD_SCORE_FIRST]);
 	vert->Add(panel);
 
 	for (int widnum = WID_PRD_SCORE_FIRST; widnum <= WID_PRD_SCORE_LAST; widnum++) {
