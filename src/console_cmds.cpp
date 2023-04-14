@@ -2546,17 +2546,27 @@ DEF_CONSOLE_CMD(ConAnnounce)
 		return true;
 	}
 
-	if (argc != 2) {
+	if (argc < 2 || argc == 3 || argc > 4) {
 		IConsolePrint(CC_HELP, "Send server announcement.");
-		IConsolePrint(CC_HELP, "Usage: 'announce <message>'.");
+		IConsolePrint(CC_HELP, "Usage: 'announce [cap <caption>] <message>'.");
 		return true;
 	}
 
+	int arg_num = 1;
+	std::string caption;
 	std::string message;
+	if (strcasecmp(argv[1], "cap") == 0) {
+		caption = argv[arg_num + 1];
+		arg_num += 2;
+	}
 
-	message = argv[1];
+	message = argv[arg_num];
 
-	Command<CMD_ANNOUNCE>::Post(message, INVALID_COMPANY);
+	if (caption.empty()) {
+		caption = "Server Announcement";
+	}
+
+	Command<CMD_ANNOUNCE>::Post(caption, message, INVALID_COMPANY);
 
 	return true;
 }

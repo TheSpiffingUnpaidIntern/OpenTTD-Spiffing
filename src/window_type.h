@@ -697,6 +697,8 @@ enum WindowClass {
 	 */
 	WC_SCREENSHOT,
 
+	WC_ANNOUNCEMENT,
+
 	WC_INVALID = 0xFFFFFFFF, ///< Invalid window.
 };
 
