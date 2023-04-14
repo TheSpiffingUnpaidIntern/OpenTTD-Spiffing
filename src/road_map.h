@@ -685,7 +685,13 @@ static inline void MakeRoadCrossing(TileIndex t, Owner road, Owner tram, Owner r
 	_m[t].m4 = INVALID_ROADTYPE;
 	_m[t].m5 = ROAD_TILE_CROSSING << 6 | roaddir;
 	SB(_me[t].m6, 2, 4, 0);
-	_me[t].m7 = road;
+// 	_me[t].m7 = road;
+	SB(_me[t].m7, 0, 5, road);
+	uint8 owner_add = ((road&0x3FF)>>5);
+	_me[t].m9 &= ~(0xe0);
+	_me[t].m9 |= (owner_add&0x1f)<<5;
+	_me[t].m10 &= ~(0x03);
+	_me[t].m10 |= (owner_add&0x1f)>>3;
 	_me[t].m8 = INVALID_ROADTYPE << 6 | rat;
 	SetRoadTypes(t, road_rt, tram_rt);
 	SetRoadOwner(t, RTT_TRAM, tram);
