@@ -125,6 +125,14 @@ struct GraphLegendWindow : Window {
 		switch (widget) {
 		case WID_GL_BACKGROUND: {
 			int sel = this->vscroll->GetScrolledRowFromWidget(pt.y, this, WID_GL_BACKGROUND);
+			int index = 0;
+			for (auto *c:Company::Iterate()) {
+				if (index == sel) {
+					sel = c->index;
+					break;
+				}
+				index++;
+			}
 			_legend_excluded_companies.toggle(sel);
 			this->SetDirty();
 			InvalidateWindowData(WC_INCOME_GRAPH, 0);
