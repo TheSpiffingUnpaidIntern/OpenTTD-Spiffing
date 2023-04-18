@@ -78,11 +78,11 @@ size_t previous_index = 0;
 
 	size_t current_index = 0;
 	size_t batch_index = 0;
-	size_t full_cycle_iters = std::ceil(Company::GetPoolSize()/16.0);
+	size_t full_cycle_iters = std::ceil(Company::GetNumItems()/16.0);
 	if (full_cycle_iters == 0) {
 		full_cycle_iters = 1;
 	}
-	const size_t iterate_per_tick = std::ceil(Company::GetPoolSize()/full_cycle_iters);
+	const size_t iterate_per_tick = std::ceil(Company::GetNumItems()/full_cycle_iters);
 
 	Backup<CompanyID> cur_company(_current_company, FILE_LINE);
 	for (const Company *c : Company::Iterate()) {
@@ -103,7 +103,7 @@ size_t previous_index = 0;
 	}
 	previous_index += batch_index;
 	cur_company.Restore();
-	if (previous_index >= Company::GetPoolSize()) {
+	if (previous_index >= Company::GetNumItems()) {
 		previous_index = 0;
 	}
 
