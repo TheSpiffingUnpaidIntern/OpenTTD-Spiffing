@@ -1091,9 +1091,10 @@ void SwitchToMode(SwitchMode new_mode)
 					OnStartScenario();
 				}
 				OnStartGame(_network_dedicated);
-				if (!_battle_royale) {
 				/* Decrease pause counter (was increased from opening load dialog) */
-					Command<CMD_PAUSE>::Post(PM_PAUSED_SAVELOAD, false);
+				Command<CMD_PAUSE>::Post(PM_PAUSED_SAVELOAD, false);
+				if (_battle_royale) {
+					Command<CMD_PAUSE>::Post(PM_PAUSED_NORMAL, true);
 				}
 			}
 			break;
