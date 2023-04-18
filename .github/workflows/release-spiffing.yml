@@ -1,0 +1,43 @@
+name: Release Spiffing
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Ref to build (for Pull Requests, use refs/pull/NNN/head)'
+        required: true
+  repository_dispatch:
+    # client_payload should be the same as the inputs for workflow_dispatch.
+    types:
+    - Build*
+  release:
+    types:
+    - published
+
+jobs:
+  source:
+    name: Source
+
+    uses: ./.github/workflows/release-source.yml
+    secrets: inherit
+
+  linux:
+    name: Linux (Generic)
+    needs: source
+
+    uses: ./.github/workflows/release-linux-spiffing.yml
+    secrets: inherit
+
+  macos:
+    name: MacOS
+    needs: source
+
+    uses: ./.github/workflows/release-macos-spiffing.yml
+    secrets: inherit
+
+  windows:
+    name: Windows
+    needs: source
+
+    uses: ./.github/workflows/release-windows-spiffing.yml
+    secrets: inherit

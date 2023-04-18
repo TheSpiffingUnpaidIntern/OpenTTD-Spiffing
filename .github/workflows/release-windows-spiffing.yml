@@ -1,0 +1,121 @@
+name: Release (Windows-Spiffing)
+
+on:
+  workflow_call:
+
+jobs:
+  windows:
+    name: Windows
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: x64
+          host: x64
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Download source
+      uses: actions/download-artifact@v3
+      with:
+        name: internal-source
+
+    - name: Unpack source
+      shell: bash
+      run: |
+        tar -xf source.tar.gz --strip-components=1
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        choco install pandoc
+
+    - name: Prepare vcpkg
+      shell: bash
+      run: |
+        vcpkg install --triplet=${{ matrix.arch }}-windows-static \
+          liblzma \
+          libpng \
+          lzo \
+          zlib \
+          # EOF
+
+    - name: Install MSVC problem matcher
+      uses: ammaraskar/msvc-problem-matcher@master
+
+    - name: Configure developer command prompt for tools
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Build tools
+      shell: bash
+      run: |
+        mkdir build-host
+        cd build-host
+
+        echo "::group::CMake"
+        cmake ${GITHUB_WORKSPACE} \
+          -GNinja \
+          -DOPTION_TOOLS_ONLY=ON \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          # EOF
+        echo "::endgroup::"
+
+        echo "::group::Build"
+        cmake --build . --target tools
+        echo "::endgroup::"
+
+    - name: Configure developer command prompt for ${{ matrix.arch }}
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.host }}
+
+    - name: Build (without installer)
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+
+        echo "::group::CMake"
+        cmake ${GITHUB_WORKSPACE} \
+          -GNinja \
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static \
+          -DCMAKE_TOOLCHAIN_FILE="c:\vcpkg\scripts\buildsystems\vcpkg.cmake" \
+          -DHOST_BINARY_DIR=${GITHUB_WORKSPACE}/build-host \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          # EOF
+        echo "::endgroup::"
+
+        echo "::group::Build"
+        cmake --build .
+        echo "::endgroup::"
+
+    - name: Create bundles
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}/build
+        echo "::group::Run CPack"
+        cpack
+        echo "::endgroup::"
+
+        echo "::group::Prepare PDB to be bundled"
+        PDB=$(ls bundles/*.zip | cut -d/ -f2 | sed 's/.zip$/.pdb/')
+        cp openttd.pdb bundles/${PDB}
+        xz -9 bundles/${PDB}
+        echo "::endgroup::"
+
+        echo "::group::Cleanup"
+        # Remove the sha256 files CPack generates; we will do this ourself at
+        # the end of this workflow.
+        rm -f bundles/*.sha256
+        echo "::endgroup::"
+
+    - name: Store bundles
+      uses: actions/upload-artifact@v3
+      with:
+        name: openttd-windows-${{ matrix.arch }}
+        path: build/bundles
+        retention-days: 5
