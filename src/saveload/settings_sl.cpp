@@ -16,6 +16,7 @@
 #include "../settings_table.h"
 #include "../network/network.h"
 #include "../fios.h"
+#include "../battle_royale_mode.h"
 
 #include "../safeguards.h"
 
@@ -171,6 +172,7 @@ struct PATSChunkHandler : ChunkHandler {
 			_pathfinding_settings,
 			_script_settings,
 			_world_settings,
+			_battle_royale_settings,
 		};
 		static std::vector<SettingVariant> settings_table;
 
@@ -191,6 +193,7 @@ struct PATSChunkHandler : ChunkHandler {
 		 * a networking environment. This ensures for example that the local
 		 * currency setting stays when joining a network-server */
 		LoadSettings(this->GetSettingTable(), &_settings_game, _settings_sl_compat);
+		BrmLoadResetMode(_settings_game.battle_royale.in_battle_mode);
 	}
 
 	void LoadCheck(size_t) const override
@@ -200,6 +203,7 @@ struct PATSChunkHandler : ChunkHandler {
 
 	void Save() const override
 	{
+		_settings_game.battle_royale.in_battle_mode = _battle_royale;
 		SaveSettings(this->GetSettingTable(), &_settings_game);
 	}
 };

@@ -58,6 +58,8 @@ add_files(
     base_media_base.h
     base_media_func.h
     base_station_base.h
+    battle_royale_mode.cpp
+    battle_royale_mode.h
     bitmap_type.h
     bmp.cpp
     bmp.h

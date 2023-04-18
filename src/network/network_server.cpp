@@ -31,6 +31,7 @@
 #include "../core/random_func.hpp"
 #include "../company_cmd.h"
 #include "../rev.h"
+#include "../battle_royale_mode.h"
 #include <mutex>
 #include <condition_variable>
 
@@ -381,6 +382,11 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendError(NetworkErrorCode err
 
 	/* Only send when the current client was in game */
 	if (this->status > STATUS_AUTHORIZED) {
+
+		if (error == NETWORK_ERROR_BATTLE_ROYALE) {
+			return NETWORK_RECV_STATUS_OKAY;
+		}
+
 		std::string client_name = this->GetClientName();
 
 		Debug(net, 1, "'{}' made an error and has been disconnected: {}", client_name, GetString(strid));
@@ -853,6 +859,9 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_JOIN(Packet *p)
 	/* join another company does not affect these values */
 	switch (playas) {
 		case COMPANY_NEW_COMPANY: // New company
+			if (_battle_royale) {
+				return this->SendError(NETWORK_ERROR_BATTLE_ROYALE);
+			}
 			if (Company::GetNumItems() >= _settings_client.network.max_companies) {
 				return this->SendError(NETWORK_ERROR_FULL);
 			}
@@ -896,6 +905,9 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_JOIN(Packet *p)
 		/* Behave as if we received PACKET_CLIENT_NEWGRFS_CHECKED */
 		return this->Receive_CLIENT_NEWGRFS_CHECKED(nullptr);
 	}
+
+
+	Command<CMD_ENTER_BATTLE_ROYALE_MODE>::Post(_battle_royale);
 
 	return this->SendNewGRFCheck();
 }
@@ -1065,7 +1077,9 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_COMMAND(Packet 
 		if (cca != CCA_NEW || cp.company != COMPANY_SPECTATOR) {
 			return this->SendError(NETWORK_ERROR_CHEATER);
 		}
-
+		if (_battle_royale) {
+			return this->SendError(NETWORK_ERROR_BATTLE_ROYALE);
+		}
 		/* Check if we are full - else it's possible for spectators to send a CMD_COMPANY_CTRL and the company is created regardless of max_companies! */
 		if (Company::GetNumItems() >= _settings_client.network.max_companies) {
 			NetworkServerSendChat(NETWORK_ACTION_SERVER_MESSAGE, DESTTYPE_CLIENT, ci->client_id, "cannot create new company, server full", CLIENT_ID_SERVER);

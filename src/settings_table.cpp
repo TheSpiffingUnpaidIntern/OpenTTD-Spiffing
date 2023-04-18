@@ -48,6 +48,8 @@
 #include "table/strings.h"
 #include "table/settings.h"
 
+#include "battle_royale_mode.h"
+
 #include "safeguards.h"
 
 SettingTable _company_settings{ _company_settings_table };
@@ -69,6 +71,7 @@ SettingTable _pathfinding_settings{ _pathfinding_settings_table };
 SettingTable _script_settings{ _script_settings_table };
 SettingTable _window_settings{ _window_settings_table };
 SettingTable _world_settings{ _world_settings_table };
+SettingTable _battle_royale_settings{ _battle_royale_settings_table };
 #if defined(_WIN32) && !defined(DEDICATED)
 SettingTable _win32_settings{ _win32_settings_table };
 #endif /* _WIN32 */
@@ -478,6 +481,11 @@ static void UpdateClientConfigValues()
 {
 	NetworkServerUpdateGameInfo();
 	if (_network_server) NetworkServerSendConfigUpdate();
+}
+
+static void BattleRoyaleModeChanged(int32 new_value)
+{
+	BrmLoadResetMode(new_value);
 }
 
 /* End - Callback Functions */

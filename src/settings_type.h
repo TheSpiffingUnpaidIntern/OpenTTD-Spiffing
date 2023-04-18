@@ -581,6 +581,13 @@ struct CompanySettings {
 	VehicleDefaultSettings vehicle;          ///< default settings for vehicles
 };
 
+struct BattleRoyaleSettings
+{
+	bool in_battle_mode;
+	uint8 shares_tax_percent;
+	uint32 shares_minimal_price;
+};
+
 /** All settings together for the game. */
 struct GameSettings {
 	DifficultySettings   difficulty;         ///< settings related to the difficulty
@@ -597,6 +604,7 @@ struct GameSettings {
 	LinkGraphSettings    linkgraph;          ///< settings for link graph calculations
 	StationSettings      station;            ///< settings related to station management
 	LocaleSettings       locale;             ///< settings related to used currency/unit system in the current game
+	BattleRoyaleSettings battle_royale;
 };
 
 /** All settings that are only important for the local client. */

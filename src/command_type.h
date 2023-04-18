@@ -346,6 +346,9 @@ enum Commands : uint16 {
 
 	CMD_ANNOUNCE,
 
+	CMD_ENTER_BATTLE_ROYALE_MODE,
+	CMD_BATTLE_ROYALE_MODE_COUNTDOWN,
+
 	CMD_END,                          ///< Must ALWAYS be on the end of this list!! (period)
 };
 

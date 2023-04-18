@@ -30,6 +30,7 @@
 #include "network_gamelist.h"
 #include "../core/backup_type.hpp"
 #include "../thread.h"
+#include "../battle_royale_mode.h"
 
 #include "table/strings.h"
 
@@ -194,6 +195,7 @@ void ClientNetworkGameSocketHandler::ClientError(NetworkRecvStatus res)
 		this->NetworkSocketHandler::MarkClosed();
 		this->CloseConnection(res);
 		_networking = false;
+		_battle_royale = false;
 
 		CloseWindowById(WC_NETWORK_STATUS_WINDOW, WN_NETWORK_STATUS_WINDOW_JOIN);
 		return;
@@ -227,6 +229,7 @@ void ClientNetworkGameSocketHandler::ClientError(NetworkRecvStatus res)
 
 	if (_game_mode != GM_MENU) _switch_mode = SM_MENU;
 	_networking = false;
+	_battle_royale = false;
 }
 
 
@@ -629,6 +632,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_ERROR(Packet *p
 		STR_NETWORK_ERROR_TIMEOUT_MAP,         // NETWORK_ERROR_TIMEOUT_MAP
 		STR_NETWORK_ERROR_TIMEOUT_JOIN,        // NETWORK_ERROR_TIMEOUT_JOIN
 		STR_NETWORK_ERROR_INVALID_CLIENT_NAME, // NETWORK_ERROR_INVALID_CLIENT_NAME
+		STR_NETWORK_ERROR_BATTLE_ROYALE,       // NETWORK_ERROR_BATTLE_ROYALE
 	};
 	static_assert(lengthof(network_error_strings) == NETWORK_ERROR_END);
 
@@ -643,6 +647,9 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_ERROR(Packet *p
 		ShowErrorMessage(err, STR_NETWORK_ERROR_KICK_MESSAGE, WL_CRITICAL);
 	} else {
 		ShowErrorMessage(err, INVALID_STRING_ID, WL_CRITICAL);
+	}
+	if (error == NETWORK_ERROR_BATTLE_ROYALE) {
+		return NETWORK_RECV_STATUS_OKAY;
 	}
 
 	/* Perform an emergency save if we had already entered the game */

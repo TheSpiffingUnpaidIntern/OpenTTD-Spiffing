@@ -45,10 +45,12 @@
 #include "walltime_func.h"
 #include "company_cmd.h"
 #include "misc_cmd.h"
+#include "battle_royale_mode.h"
 
 #include <sstream>
 
 #include "safeguards.h"
+
 
 /* scriptfile handling */
 static uint _script_current_depth; ///< Depth of scripts running (used to abort execution when #ConReturn is encountered).
@@ -2571,6 +2573,75 @@ DEF_CONSOLE_CMD(ConAnnounce)
 	return true;
 }
 
+DEF_CONSOLE_CMD(ConPrepareBattleRoyale)
+{
+	// [difficulty]
+	IConsoleSetSetting("initial_interest", "4", true);
+	IConsoleSetSetting("economy", "true", true);
+	IConsoleSetSetting("vehicle_costs", "2", true);
+
+	// [game_creation]
+	IConsoleSetSetting("starting_year", "1935", true);
+	IConsoleSetSetting("ending_year", "2035", true);
+
+	// [vehicle]
+	IConsoleSetSetting("max_trains", "300", true);
+	IConsoleSetSetting("max_roadveh", "300", true);
+	IConsoleSetSetting("max_aircraft", "0", true);
+	IConsoleSetSetting("max_ships", "300", true);
+
+	// [economy]
+	IConsoleSetSetting("allow_shares", "true", true);
+	IConsoleSetSetting("give_money", "false", true);
+	IConsoleSetSetting("min_years_for_shares", "8", true);
+	IConsoleSetSetting("infrastructure_maintenance", "true", true);
+
+	// [network]
+	IConsoleSetSetting("autoclean_companies", "true", true);
+	IConsoleSetSetting("max_companies", "100", true);
+	IConsoleSetSetting("max_clients", "110", true);
+	IConsoleSetSetting("pause_on_newgame", "true", true);
+	IConsoleSetSetting("restart_game_year", "0", true);
+	Command<CMD_ENTER_BATTLE_ROYALE_MODE>::Post(false);
+	StartNewGameWithoutGUI(GENERATE_NEW_SEED);
+
+	return true;
+}
+
+DEF_CONSOLE_CMD(ConStartSpiffingBattleRoyale)
+{
+	if (_networking && !_network_server) {
+		IConsolePrint(CC_ERROR, "Only the server can start the battle royale.");
+		return true;
+	}
+
+
+
+// 	_battle_royale = true;
+	Command<CMD_ENTER_BATTLE_ROYALE_MODE>::Post(true);
+
+
+	if ((_pause_mode & PM_PAUSED_NORMAL) == PM_UNPAUSED) {
+		if (!_networking) {
+			IConsolePrint(CC_DEFAULT, "Game paused.");
+		}
+		Command<CMD_PAUSE>::Post(PM_PAUSED_NORMAL, true);
+	}
+	IConsolePrint(CC_DEFAULT, "Entered Battle Royale Mode");
+	return true;
+}
+
+DEF_CONSOLE_CMD(ConStopSpiffingBattleRoyale)
+{
+	if (_networking && !_network_server) {
+		IConsolePrint(CC_ERROR, "Only the server can stop the battle royale.");
+		return true;
+	}
+
+	Command<CMD_ENTER_BATTLE_ROYALE_MODE>::Post(false);
+	return true;
+}
+
 /*******************************
  * console command registration
  *******************************/
@@ -2713,4 +2784,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("dump_info",               ConDumpInfo);
 
 	IConsole::CmdRegister("announce",                ConAnnounce,            ConHookServerOnly);
+
+	IConsole::CmdRegister("prepare_battle_royale",   ConPrepareBattleRoyale);
+	IConsole::CmdRegister("start_battle_royale",     ConStartSpiffingBattleRoyale);
+	IConsole::CmdRegister("stop_battle_royale",      ConStopSpiffingBattleRoyale);
 }

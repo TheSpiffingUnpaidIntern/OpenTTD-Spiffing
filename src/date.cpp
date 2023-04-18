@@ -20,6 +20,9 @@
 #include "saveload/saveload.h"
 #include "newgrf_profiling.h"
 #include "widgets/statusbar_widget.h"
+#include "command_func.h"
+#include "misc_cmd.h"
+#include "battle_royale_mode.h"
 
 #include "safeguards.h"
 
@@ -201,7 +204,16 @@ static void OnNewYear()
 
 	/* check if we reached end of the game (end of ending year); 0 = never */
 	if (_cur_year == _settings_game.game_creation.ending_year + 1 && _settings_game.game_creation.ending_year != 0) {
-		ShowEndGameChart();
+		if (_battle_royale) {
+			if (!_networking || _network_server) {
+				Command<CMD_PAUSE>::Post(PM_PAUSED_NORMAL, true);
+				Command<CMD_ANNOUNCE>::Post("Game Over",
+											"100 years is up",
+											INVALID_COMPANY);
+			}
+		} else {
+			ShowEndGameChart();
+		}
 	}
 
 	/* check if we reached the maximum year, decrement dates by a year */

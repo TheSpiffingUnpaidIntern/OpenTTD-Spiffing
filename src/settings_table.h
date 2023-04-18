@@ -34,6 +34,7 @@ extern SettingTable _pathfinding_settings;
 extern SettingTable _script_settings;
 extern SettingTable _window_settings;
 extern SettingTable _world_settings;
+extern SettingTable _battle_royale_settings;
 #if defined(_WIN32) && !defined(DEDICATED)
 extern SettingTable _win32_settings;
 #endif /* _WIN32 */

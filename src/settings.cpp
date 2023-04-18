@@ -86,6 +86,7 @@ static auto &GenericSettingTables()
 		_pathfinding_settings,
 		_script_settings,
 		_world_settings,
+		_battle_royale_settings,
 	};
 	return _generic_setting_tables;
 }

@@ -5629,3 +5629,15 @@ STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELO
 STR_WHITE_RAW_STRING                                            :{WHITE}{RAW_STRING}
 STR_ANNOUNCEMENT_CAPTION                                        :{WHITE}Server Announcement
 STR_ANNOUNCEMENT_TEXT                                           :{WHITE}{RAW_STRING}
+
+STR_CONFIG_SETTING_BATTLE_ROYALE                                :{ORANGE}Battle Royale Mode
+STR_CONFIG_SETTING_SHARES_TAX_PERCENT                           :Company share tax percent: {STRING2}
+STR_CONFIG_SETTING_SHARES_TAX_PERCENT_HELPTEXT                  :Additional price increase for share acquisition
+STR_CONFIG_SETTING_SHARES_MINIMAL_PRICE                         :Company shares minimal price: {STRING2}
+STR_CONFIG_SETTING_SHARES_MINIMAL_PRICE_HELPTEXT                :Minimal price of company shares
+STR_NETWORK_ERROR_BATTLE_ROYALE                                 :{WHITE}Can not create companies in battle royale mode
+STR_BATTLE_ROYALE_COUNTDOWN_CAPTION                             :{WHITE}Entering Battle Royale Mode
+STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE                             :{WHITE}Embrace yourself to a totally balanced battle in {NUM} second{P "" s}
+STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE1                            :{WHITE}{RAW_STRING}
+STR_BATTLE_ROYALE_BUY_SHARE_BACK                                :{BLACK}Buy back 25% of shares share in your company
+STR_BATTLE_ROYALE_BUY_SHARE_BACK_TOOLTIP                        :{BLACK}Buy back 25% of shares in your company. Shift+Click shows estimated cost without purchasing any share

@@ -51,6 +51,7 @@
 #include "../waypoint_cmd.h"
 #include "../script/script_cmd.h"
 #include <array>
+#include "../battle_royale_mode.h"
 
 #include "../safeguards.h"
 
@@ -82,7 +83,8 @@ static constexpr auto _callback_tuple = std::make_tuple(
 	&CcBuildIndustry,
 	&CcStartStopVehicle,
 	&CcGame,
-	&CcAddVehicleNewGroup
+	&CcAddVehicleNewGroup,
+	&CcBrmAnnounce
 );
 
 #ifdef SILENCE_GCC_FUNCTION_POINTER_CAST

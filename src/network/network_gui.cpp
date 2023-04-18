@@ -44,6 +44,7 @@
 #include "../table/sprites.h"
 
 #include "../stringfilter_type.h"
+#include "../battle_royale_mode.h"
 
 #ifdef __EMSCRIPTEN__
 #	include <emscripten.h>
@@ -1658,6 +1659,7 @@ private:
 		/* As spectator, show a line to create a new company. */
 		if (client_playas == COMPANY_SPECTATOR && !NetworkMaxCompaniesReached()) {
 			this->buttons[line_count].emplace_back(new CompanyButton(SPR_JOIN, STR_NETWORK_CLIENT_LIST_NEW_COMPANY_TOOLTIP, COLOUR_ORANGE, COMPANY_SPECTATOR, &NetworkClientListWindow::OnClickCompanyNew));
+			this->buttons[line_count].back()->disabled = _battle_royale;
 			this->line_count += 1;
 		}
 

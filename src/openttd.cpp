@@ -71,10 +71,13 @@
 
 #include "linkgraph/linkgraphschedule.h"
 
+#include "battle_royale_mode.h"
+
 #include <stdarg.h>
 #include <system_error>
 
 #include "safeguards.h"
+
 
 #ifdef __EMSCRIPTEN__
 #	include <emscripten.h>
@@ -380,6 +383,7 @@ void MakeNewgameSettingsLive()
 	/* Copy newgame settings to active settings.
 	 * Also initialise old settings needed for savegame conversion. */
 	_settings_game = _settings_newgame;
+	_battle_royale = false;
 	_old_vds = _settings_client.company.vehicle;
 
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
@@ -548,6 +552,7 @@ int openttd_main(int argc, char *argv[])
 
 	_game_mode = GM_MENU;
 	_switch_mode = SM_MENU;
+	_battle_royale = false;
 
 	GetOptData mgo(argc - 1, argv + 1, _options);
 	int ret = 0;
@@ -1086,8 +1091,10 @@ void SwitchToMode(SwitchMode new_mode)
 					OnStartScenario();
 				}
 				OnStartGame(_network_dedicated);
+				if (!_battle_royale) {
 				/* Decrease pause counter (was increased from opening load dialog) */
-				Command<CMD_PAUSE>::Post(PM_PAUSED_SAVELOAD, false);
+					Command<CMD_PAUSE>::Post(PM_PAUSED_SAVELOAD, false);
+				}
 			}
 			break;
 		}
@@ -1508,6 +1515,7 @@ void GameLoop()
 		}
 		/* Singleplayer */
 		StateGameLoop();
+		BrmProcessGameTick();
 	}
 
 	if (!_pause_mode && HasBit(_display_opt, DO_FULL_ANIMATION)) DoPaletteAnimations();

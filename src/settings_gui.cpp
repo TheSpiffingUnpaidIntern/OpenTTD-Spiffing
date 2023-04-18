@@ -1896,6 +1896,12 @@ static SettingsContainer &GetSettingsTree()
 			network->Add(new SettingEntry("network.use_relay_service"));
 		}
 
+		SettingsPage *battle_royale = main->Add(new SettingsPage(STR_CONFIG_SETTING_BATTLE_ROYALE));
+		{
+			battle_royale->Add(new SettingEntry("battle_royale.shares_tax_percent"));
+			battle_royale->Add(new SettingEntry("battle_royale.shares_minimal_price"));
+		}
+
 		main->Init();
 	}
 	return *main;

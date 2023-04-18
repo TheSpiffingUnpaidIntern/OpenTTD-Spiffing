@@ -51,11 +51,14 @@
 #include "company_cmd.h"
 #include "economy_cmd.h"
 #include "vehicle_cmd.h"
+#include "misc_cmd.h"
 
 #include "table/strings.h"
 #include "table/pricebase.h"
 
 #include "safeguards.h"
+
+#include "battle_royale_mode.h"
 
 
 /* Initialize the cargo payment-pool */
@@ -338,6 +341,9 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	Backup<CompanyID> cur_company2(_current_company, FILE_LINE);
 	Company *c = Company::Get(old_owner);
 	for (auto &share_owner : c->share_owners) {
+		if (_battle_royale && new_owner == INVALID_OWNER) {
+			break;
+		}
 		if (share_owner == INVALID_OWNER) continue;
 
 		if (c->bankrupt_value == 0 && share_owner == new_owner) {
@@ -612,6 +618,9 @@ static void CompanyCheckBankrupt(Company *c)
 			c->bankrupt_asked.reset();
 			c->bankrupt_asked.set(c->index, true); // Don't ask the owner
 			c->bankrupt_timeout = 0;
+			if (_battle_royale) {
+				c->bankrupt_asked.set(); // do not ask for buyout in battle royale mode
+			}
 
 			/* The company assets should always have some value */
 			assert(c->bankrupt_value > 0);
@@ -641,6 +650,12 @@ static void CompanyCheckBankrupt(Company *c)
 			 * player we are sure (the above check) that we are not the local
 			 * company and thus we won't be moved. */
 			if (!_networking || _network_server) {
+				if (_battle_royale) {
+					std::string res;
+					res += std::string("Company ") + std::to_string(c->index+1) + " has been eliminated.";
+					Command<CMD_ANNOUNCE>::Post("Company Eliminated", res, INVALID_COMPANY);
+					Command<CMD_ANNOUNCE>::Post(std::string("You are out"), std::string("Your company was eliminated!"), c->index);
+				}
 				Command<CMD_COMPANY_CTRL>::Post(CCA_DELETE, c->index, CRR_BANKRUPT, INVALID_CLIENT_ID);
 				return;
 			}
@@ -2027,8 +2042,12 @@ CommandCost CmdBuyShareInCompany(DoCommandFlag flags, CompanyID target_company)
 	Company *c = Company::GetIfValid(target_company);
 
 	/* Check if buying shares is allowed (protection against modified clients)
-	 * Cannot buy own shares */
-	if (c == nullptr || !_settings_game.economy.allow_shares || _current_company == target_company) return CMD_ERROR;
+	 * Cannot buy own shares
+	 * + allow buying out your shares in battle royale
+	 */
+
+	if (c == nullptr || !_settings_game.economy.allow_shares ||
+		(!_battle_royale && _current_company == target_company)) return CMD_ERROR;
 
 	/* Protect new companies from hostile takeovers */
 	if (_cur_year - c->inaugurated_year < _settings_game.economy.min_years_for_shares) return_cmd_error(STR_ERROR_PROTECTED);
@@ -2041,21 +2060,43 @@ CommandCost CmdBuyShareInCompany(DoCommandFlag flags, CompanyID target_company)
 
 		if (GetAmountOwnedBy(c, _current_company) == 3 && !MayCompanyTakeOver(_current_company, target_company)) return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
 	}
+	if (_current_company == target_company) {
+		auto unowned_share = std::find_if(c->share_owners.rbegin(), c->share_owners.rend(),
+										  [](auto share_owner){return share_owner != INVALID_OWNER;});
+		if (unowned_share == c->share_owners.rend()) {
+			return cost;
+		}
 
-
-	cost.AddCost(CalculateCompanyValue(c) >> 2);
+		Money price = CalculateCompanyValue(c) >> 2;
+		price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
+		price = std::max<Money>(price, _settings_game.battle_royale.shares_minimal_price);
+		cost.AddCost(price);
+		if (flags & DC_EXEC) {
+			*unowned_share = INVALID_OWNER;
+			InvalidateWindowData(WC_COMPANY, target_company);
+			CompanyAdminUpdate(c);
+		}
+		return cost;
+	}
+	Money price = CalculateCompanyValue(c) >> 2;
+	price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
+	price = std::max<Money>(price, _settings_game.battle_royale.shares_minimal_price);
+	cost.AddCost(price);
 	if (flags & DC_EXEC) {
 		auto unowned_share = std::find(c->share_owners.begin(), c->share_owners.end(), INVALID_OWNER);
 		assert(unowned_share != c->share_owners.end()); // share owners is guaranteed to contain at least one INVALID_OWNER, i.e. unowned share
 		*unowned_share = _current_company;
 
-		auto current_company_owns_share = [](auto share_owner) { return share_owner == _current_company; };
+		auto current_company_owns_share = [](auto share_owner) {
+			return share_owner == _current_company;
+		};
 		if (std::all_of(c->share_owners.begin(), c->share_owners.end(), current_company_owns_share)) {
 			c->bankrupt_value = 0;
 			DoAcquireCompany(c);
 		}
 		InvalidateWindowData(WC_COMPANY, target_company);
 		CompanyAdminUpdate(c);
+		BrmProcessBuyCompanyShare(target_company);
 	}
 	return cost;
 }

@@ -36,6 +36,7 @@
 #include "../gfx_func.h"
 #include "../error.h"
 #include "../misc_cmd.h"
+#include "../battle_royale_mode.h"
 #include <charconv>
 #include <sstream>
 #include <iomanip>
@@ -324,6 +325,7 @@ StringID GetNetworkErrorMsg(NetworkErrorCode err)
 		STR_NETWORK_ERROR_CLIENT_TIMEOUT_MAP,
 		STR_NETWORK_ERROR_CLIENT_TIMEOUT_JOIN,
 		STR_NETWORK_ERROR_CLIENT_INVALID_CLIENT_NAME,
+		STR_NETWORK_ERROR_BATTLE_ROYALE,
 	};
 	static_assert(lengthof(network_error_strings) == NETWORK_ERROR_END);
 
@@ -1184,6 +1186,7 @@ void NetworkGameLoop()
 #endif
 
 		NetworkServer_Tick(send_frame);
+		BrmProcessGameTick();
 	} else {
 		/* Client */
 
