@@ -23,6 +23,7 @@ enum CompanyWidgets {
 	WID_C_DESC_VEHICLE,               ///< Vehicles.
 	WID_C_DESC_VEHICLE_COUNTS,        ///< Vehicle count.
 	WID_C_DESC_COMPANY_VALUE,         ///< Company value.
+	WID_C_DESC_SHARES_COSTS,          ///< Company shares value, shortcut
 	WID_C_DESC_INFRASTRUCTURE,        ///< Infrastructure.
 	WID_C_DESC_INFRASTRUCTURE_COUNTS, ///< Infrastructure count.
 

@@ -5641,3 +5641,4 @@ STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE                             :{WHITE}Embrace 
 STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE1                            :{WHITE}{RAW_STRING}
 STR_BATTLE_ROYALE_BUY_SHARE_BACK                                :{BLACK}Buy back 10% of shares share in your company
 STR_BATTLE_ROYALE_BUY_SHARE_BACK_TOOLTIP                        :{BLACK}Buy back 10% of shares in your company. Shift+Click shows estimated cost without purchasing any share
+STR_COMPANY_VIEW_SHARES_COSTS                                   :{GOLD}Shares costs: {WHITE}{CURRENCY_LONG}

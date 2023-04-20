@@ -2203,6 +2203,8 @@ static const NWidgetPart _nested_company_widgets[] = {
 					EndContainer(),
 				EndContainer(),
 				NWidget(WWT_TEXT, COLOUR_GREY, WID_C_DESC_COMPANY_VALUE), SetDataTip(STR_COMPANY_VIEW_COMPANY_VALUE, STR_NULL), SetFill(1, 0),
+				NWidget(WWT_TEXT, COLOUR_GREY, WID_C_DESC_SHARES_COSTS),
+				SetDataTip(STR_WHITE_RAW_STRING, STR_NULL), SetFill(1, 0),
 				NWidget(NWID_VERTICAL), SetPIP(4, 2, 4),
 					NWidget(NWID_HORIZONTAL), SetPIP(0, 4, 0),
 						NWidget(NWID_VERTICAL),
@@ -2394,11 +2396,23 @@ struct CompanyWindow : Window
 				*size = maxdim(*size, d);
 				break;
 			}
-
 			case WID_C_DESC_COMPANY_VALUE:
 				SetDParam(0, INT64_MAX); // Arguably the maximum company value
 				size->width = GetStringBoundingBox(STR_COMPANY_VIEW_COMPANY_VALUE).width;
 				break;
+
+			case WID_C_DESC_SHARES_COSTS: {
+				std::string res;
+				SetDParam(0, INT64_MAX); // Arguably the maximum company value
+				res += GetString(STR_COMPANY_VIEW_SHARES_COSTS);
+				res += "(+";
+				SetDParam(0, INT64_MAX);
+				res += GetString(STR_FINANCES_ZERO_INCOME);
+				res += " tax)";
+				SetDParamStr(0, res);
+				size->width = GetStringBoundingBox(STR_WHITE_RAW_STRING).width;
+				break;
+			}
 
 			case WID_C_DESC_VEHICLE_COUNTS:
 				SetDParamMaxValue(0, 5000); // Maximum number of vehicles
@@ -2570,10 +2584,23 @@ struct CompanyWindow : Window
 			case WID_C_DESC_INAUGURATION:
 				SetDParam(0, Company::Get((CompanyID)this->window_number)->inaugurated_year);
 				break;
-
 			case WID_C_DESC_COMPANY_VALUE:
 				SetDParam(0, CalculateCompanyValue(Company::Get((CompanyID)this->window_number)));
 				break;
+
+			case WID_C_DESC_SHARES_COSTS: {
+				static std::string res;
+				Money price = CalculateCompanyValue(Company::Get((CompanyID)this->window_number));
+				price = std::max<Money>(price/MAX_COMPANY_SHARE_OWNERS, _settings_game.battle_royale.shares_minimal_price);
+				SetDParam(0, price); // Arguably the maximum company value
+				res = GetString(STR_COMPANY_VIEW_SHARES_COSTS);
+				res += "(+";
+				SetDParam(0, (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f));
+				res += GetString(STR_FINANCES_ZERO_INCOME);
+				res += " tax)";
+				SetDParamStr(0, res);
+				break;
+			}
 		}
 	}
 
