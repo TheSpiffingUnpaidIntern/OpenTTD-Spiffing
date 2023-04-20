@@ -2731,7 +2731,13 @@ struct CompanyWindow : Window
 	 */
 	void OnInvalidateData(int data = 0, bool gui_scope = true) override
 	{
-		if (this->window_number == _local_company) return;
+		if (this->window_number == _local_company) {
+			const Company *c = Company::Get(this->window_number);
+			this->SetWidgetDisabledState(WID_C_BUY_BACK_SHARE, (GetAmountOwnedBy(c, INVALID_OWNER) == MAX_COMPANY_SHARE_OWNERS) ||
+					/* Spectators cannot do anything of course */
+					_local_company == COMPANY_SPECTATOR);
+			return;
+		}
 
 		if (_settings_game.economy.allow_shares) { // Shares are allowed
 			const Company *c = Company::Get(this->window_number);
@@ -2742,9 +2748,6 @@ struct CompanyWindow : Window
 					(GetAmountOwnedBy(c, INVALID_OWNER) == 1 && !c->is_ai) ||
 					/* Spectators cannot do anything of course */
 					_local_company == COMPANY_SPECTATOR);
-			this->SetWidgetDisabledState(WID_C_BUY_BACK_SHARE, GetAmountOwnedBy(c, INVALID_OWNER) != 0 ||
-					/* Spectators cannot do anything of course */
-					_local_company == COMPANY_SPECTATOR);
 
 			/* If the company doesn't own any shares, disable sell button */
 			this->SetWidgetDisabledState(WID_C_SELL_SHARE, (GetAmountOwnedBy(c, _local_company) == 0) ||
@@ -2752,6 +2755,7 @@ struct CompanyWindow : Window
 					_local_company == COMPANY_SPECTATOR);
 		} else { // Shares are not allowed, disable buy/sell buttons
 			this->DisableWidget(WID_C_BUY_SHARE);
+			this->DisableWidget(WID_C_BUY_BACK_SHARE);
 			this->DisableWidget(WID_C_SELL_SHARE);
 		}
 	}
