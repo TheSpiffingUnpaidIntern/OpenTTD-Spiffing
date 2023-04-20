@@ -72,7 +72,7 @@ void BrmProcessBuyCompanyShare(CompanyID target_company)
 	if (_networking && ! _network_server) {
 		if (_local_company == target_company) {
 			std::string res;
-			res += std::string("Company ") + std::to_string(_current_company) + " bought your shares.";
+			res += std::string("Company ") + std::to_string(_current_company+1) + " bought your shares.";
 			Command<CMD_ANNOUNCE>::Do(DC_EXEC, "Shares Bought", res, _local_company);
 		}
 		return;
