@@ -2067,9 +2067,9 @@ CommandCost CmdBuyShareInCompany(DoCommandFlag flags, CompanyID target_company)
 			return cost;
 		}
 
-		Money price = CalculateCompanyValue(c) >> 2;
-		price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
+		Money price = CalculateCompanyValue(c)/MAX_COMPANY_SHARE_OWNERS;
 		price = std::max<Money>(price, _settings_game.battle_royale.shares_minimal_price);
+// 		price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
 		cost.AddCost(price);
 		if (flags & DC_EXEC) {
 			*unowned_share = INVALID_OWNER;
@@ -2078,9 +2078,9 @@ CommandCost CmdBuyShareInCompany(DoCommandFlag flags, CompanyID target_company)
 		}
 		return cost;
 	}
-	Money price = CalculateCompanyValue(c) >> 2;
-	price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
+	Money price = CalculateCompanyValue(c)/MAX_COMPANY_SHARE_OWNERS;
 	price = std::max<Money>(price, _settings_game.battle_royale.shares_minimal_price);
+	price += (float)price*((float)_settings_game.battle_royale.shares_tax_percent/100.0f);
 	cost.AddCost(price);
 	if (flags & DC_EXEC) {
 		auto unowned_share = std::find(c->share_owners.begin(), c->share_owners.end(), INVALID_OWNER);
@@ -2122,7 +2122,7 @@ CommandCost CmdSellShareInCompany(DoCommandFlag flags, CompanyID target_company)
 	if (GetAmountOwnedBy(c, _current_company) == 0) return CommandCost();
 
 	/* adjust it a little to make it less profitable to sell and buy */
-	Money cost = CalculateCompanyValue(c) >> 2;
+	Money cost = CalculateCompanyValue(c)/MAX_COMPANY_SHARE_OWNERS;
 	cost = -(cost - (cost >> 7));
 
 	if (flags & DC_EXEC) {

@@ -92,9 +92,8 @@ void BrmProcessBuyCompanyShare(CompanyID target_company)
 			count++;
 		}
 	}
-	const float percentage = (float)count/(float)MAX_COMPANY_SHARE_OWNERS; // who knows...
 
-	if (percentage < 0.75) {
+	if (count < MAX_COMPANY_SHARE_OWNERS-1) {
 		return;
 	}
 

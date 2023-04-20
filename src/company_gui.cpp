@@ -2541,7 +2541,7 @@ struct CompanyWindow : Window
 				for (const Company *c2 : Company::Iterate()) {
 					uint amt = GetAmountOwnedBy(c, c2->index);
 					if (amt != 0) {
-						SetDParam(0, amt * 25);
+						SetDParam(0, amt * (100.0f/MAX_COMPANY_SHARE_OWNERS));
 						SetDParam(1, c2->index);
 
 						DrawString(r.left, r.right, y, STR_COMPANY_VIEW_SHARES_OWNED_BY);

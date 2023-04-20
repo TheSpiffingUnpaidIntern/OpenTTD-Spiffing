@@ -3736,10 +3736,10 @@ STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}会社�
 STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON                          :{BLACK}社長名
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}社長の名前を変更します
 
-STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}会社株の25%を買収
-STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}会社株の25%を売却
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}この会社の株式の25%を購入します。Shift+クリックで費用を見積もります
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}この会社の株式の25%を売却します。Shift+クリックで売却価格の見積が出ます
+STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}会社株の10%を買収
+STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}会社株の10%を売却
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}この会社の株式の10%を購入します。Shift+クリックで費用を見積もります
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}この会社の株式の10%を売却します。Shift+クリックで売却価格の見積が出ます
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :会社名
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :社長名
@@ -4766,8 +4766,8 @@ STR_ERROR_INSUFFICIENT_FUNDS                                    :{WHITE}借入�
 STR_ERROR_CAN_T_GIVE_MONEY                                      :{WHITE}この会社にお金を渡すことはできません...
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}会社を買収できません
 STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS                      :{WHITE}会社の本社ビルを建設できません
-STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}この会社の株を25%購入できません
-STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}この会社の株を25%売却できません
+STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}この会社の株を10%購入できません
+STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}この会社の株を10%売却できません
 STR_ERROR_PROTECTED                                             :{WHITE}この会社は開設から6年が経過していません
 
 # Town related errors

@@ -3736,10 +3736,10 @@ STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}改变�
 STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON                          :{BLACK}总裁姓名
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}为总裁改名
 
-STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}购买其 25% 的股份
-STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}出售其 25% 的股份
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}购买此公司 25% 的股份，按住 Shift 键单击可以显示所需资金
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}出售此公司 25% 的股份，按住 Shift 键单击可以显示预计收入
+STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}购买其 10% 的股份
+STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}出售其 10% 的股份
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}购买此公司 10% 的股份，按住 Shift 键单击可以显示所需资金
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}出售此公司 10% 的股份，按住 Shift 键单击可以显示预计收入
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :公司名称
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :总裁姓名

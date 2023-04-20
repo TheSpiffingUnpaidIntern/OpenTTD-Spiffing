@@ -475,6 +475,7 @@ static const SaveLoad _company_desc[] = {
 
 	SLE_CONDARR(CompanyProperties, share_owners,          SLE_UINT8, 4,                SL_MIN_VERSION, SLV_MAX_OG),
 	SLE_CONDARR(CompanyProperties, share_owners,          SLE_UINT8, 4,                SLV_FIVE_HUNDRED_COMPANIES, SLV_FIVE_HUNDRED_COMPANIES), // my bad, had to make it UINT16 back then, now too late
+	SLE_CONDARR(CompanyProperties, share_owners,          SLE_UINT16, MAX_COMPANY_SHARE_OWNERS, SLV_BATTLE_ROYALE, SL_MAX_VERSION),
 
 	SLE_CONDVAR(CompanyProperties, num_valid_stat_ent,    SLE_UINT8,                   SL_MIN_VERSION, SLV_SAVELOAD_LIST_LENGTH),
 

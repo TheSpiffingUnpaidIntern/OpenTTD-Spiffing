@@ -347,6 +347,7 @@ enum SaveLoadVersion : uint16 {
 
 	SLV_MAX_OG                 = 665, // just in case for now
 	SLV_FIVE_HUNDRED_COMPANIES = 666,
+	SLV_BATTLE_ROYALE,
 	SL_MAX_VERSION,                         ///< Highest possible saveload version
 };
 

@@ -3737,10 +3737,10 @@ STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}Cambiar 
 STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON                          :{BLACK}Nome do presidente
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Cambiar o nome do presidente
 
-STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}Mercar un 25% das accións da compañía
-STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}Vender un 25% das accións da compañía
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}Mercar un 25% das accións desta compañía. Shift+Click mostra o custo estimado sen mercar ningunha acción
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}Vender un 25% das accións desta compañía. Shift+Click mostra o custo estimado sen vender ningunha acción
+STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}Mercar un 10% das accións da compañía
+STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}Vender un 10% das accións da compañía
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}Mercar un 10% das accións desta compañía. Shift+Click mostra o custo estimado sen mercar ningunha acción
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}Vender un 10% das accións desta compañía. Shift+Click mostra o custo estimado sen vender ningunha acción
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :Nome da compañía
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :Nome do presidente
@@ -4767,8 +4767,8 @@ STR_ERROR_INSUFFICIENT_FUNDS                                    :{WHITE}Non pode
 STR_ERROR_CAN_T_GIVE_MONEY                                      :{WHITE}Non se poden dar cartos a esta compañía...
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}Non se pode compra-la compañía...
 STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS                      :{WHITE}Non se pode construí-la sede
-STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}Non se pode comprar un 25% das accións desta compañía...
-STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}Non se pode vender un 25% das accións desta compañía...
+STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}Non se pode comprar un 10% das accións desta compañía...
+STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}Non se pode vender un 10% das accións desta compañía...
 STR_ERROR_PROTECTED                                             :{WHITE}Esta compañía aínda non é suficientemente antiga para comerciar con accións...
 
 # Town related errors

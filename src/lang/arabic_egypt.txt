@@ -3181,10 +3181,10 @@ STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}غير �
 STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON                          :{BLACK}اسم صاحب الشركة
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}غير اسم المدير
 
-STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}اشتري 25% من أسهم الشركة
-STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}بيع 25% من أسهم الشركة
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}اشتري 25% من اسهم هذه الشركة, + مفتاح الاعلى لاظهار التكلفه
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}بيع 25% من اسهم هذه الشركة
+STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}اشتري 10% من أسهم الشركة
+STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}بيع 10% من أسهم الشركة
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}اشتري 10% من اسهم هذه الشركة, + مفتاح الاعلى لاظهار التكلفه
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}بيع 10% من اسهم هذه الشركة
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :اسم الشركة
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :اسم صاحب الشركة
@@ -4127,8 +4127,8 @@ STR_ERROR_CAN_T_REPAY_LOAN                                      :{WHITE}لا ي�
 STR_ERROR_INSUFFICIENT_FUNDS                                    :{WHITE}لا يمكن التخلي عن النقود المعطاة من البنك على سبيل الاعارة ...
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}لا يمكن شراء الشركة ...
 STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS                      :{WHITE}لا يمكن بناء مبنى الشركة الئيسي ...
-STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}لا يمكن شراء 25% من اسهم الشركة ...
-STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}لا يمكن بيع 25% من اسهم الشركة ...
+STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}لا يمكن شراء 10% من اسهم الشركة ...
+STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}لا يمكن بيع 10% من اسهم الشركة ...
 STR_ERROR_PROTECTED                                             :{WHITE}هذه الشركة ليست عريقة بقدر كافي لمشاركة الأسهم ...
 
 # Town related errors

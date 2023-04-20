@@ -3205,10 +3205,10 @@ STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}Feroarje
 STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON                          :{BLACK}Namme fan Direkteur
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Feroarje de namme fan de direkteur
 
-STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}Keapje 25% oandielen fan bedriuw
-STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}Ferkeapje 25% oandielen fan bedriuw
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}Keapje 25% oandielen fan dit bedriuw. Shift+Klik toant ferwachte kosten sûnder oandielen te keapje
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}Ferkeapje 25% oandielen fan dit bedriuw. Shift+Klik toant ferwachte kosten sûnder oandielen te ferkeapje
+STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}Keapje 10% oandielen fan bedriuw
+STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}Ferkeapje 10% oandielen fan bedriuw
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}Keapje 10% oandielen fan dit bedriuw. Shift+Klik toant ferwachte kosten sûnder oandielen te keapje
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}Ferkeapje 10% oandielen fan dit bedriuw. Shift+Klik toant ferwachte kosten sûnder oandielen te ferkeapje
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :Bedriuwsnamme
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :Namme fan Direkteur
@@ -4001,8 +4001,8 @@ STR_ERROR_CAN_T_REPAY_LOAN                                      :{WHITE}Kin lien
 STR_ERROR_INSUFFICIENT_FUNDS                                    :{WHITE}Kin gjin jild dat fan de bank lient is weijaan...
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}Kin bedriuw net keapje...
 STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS                      :{WHITE}Kin gjin haadkantoar boue
-STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}Kin net 25% oandielen fan dit bedriuw keapje...
-STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}Kin net 25% oandielen fan dit bedriuw ferkeapje...
+STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS                            :{WHITE}Kin net 10% oandielen fan dit bedriuw keapje...
+STR_ERROR_CAN_T_SELL_25_SHARE_IN                                :{WHITE}Kin net 10% oandielen fan dit bedriuw ferkeapje...
 STR_ERROR_PROTECTED                                             :{WHITE}Dit bedriuw is noch net âld genoch om oandielen te ferhannelje...
 
 # Town related errors
