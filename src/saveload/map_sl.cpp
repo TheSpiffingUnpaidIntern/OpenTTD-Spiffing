@@ -132,8 +132,26 @@ struct MAPOChunkHandler : ChunkHandler {
 		for (TileIndex i = 0; i != size;) {
 			SlCopy(buf.data(), MAP_SL_BUF_SIZE, SLE_UINT8);
 			for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) {
+				if (IsSavegameVersionBefore(SLV_FIVE_HUNDRED_COMPANIES)) {
+					_me[i].m9 = 0;
+					_me[i].m10 = 0;
+					if (GB(buf[j], 0, 5) >= 0x0f) { // in case if the save doesn't have the MAP9 and MAPD, otherwise the values would be overwritten, hopefully
+						uint16 owner = buf[j] + 0x200;
+						uint8_t owner_add = ((owner&0x3FF)>>5);
+						_me[i].m9 &= ~(0x1f);
+						_me[i].m9 |= owner_add&0x1f;
+						if (owner == OWNER_NONE) {
+							_me[i].m9 &= ~(0xe0);
+							_me[i].m9 |= (owner_add&0x1f)<<5;
+							_me[i].m10 &= ~(0x03);
+							_me[i].m10 |= (owner_add&0x1f)>>3;
+							_me[i].m10 &= ~(0xFC);
+							_me[i].m10 |= (owner_add&0x1f)<<2;
+						}
+					}
+				}
 				_m[i++].m1 = buf[j];
-// 				printf("LoadetTileOwner: %u: %04X\n",(uint32)i-1,(Owner)((_m[i-1].m1 & 0x9F) | ((_me[i-1].m6 & 0x03) << 5)|((uint16)_me[i-1].m9<<8)));
+// 				printf("LoadetTileOwner: %u: %04X\n",(uint32)i-1,(Owner)(GB(_m[i-1].m1, 0, 5) | (((uint16)_me[i-1].m9&0x1F)<<5)));
 			}
 		}
 	}
@@ -191,7 +209,16 @@ struct M3LOChunkHandler : ChunkHandler {
 
 		for (TileIndex i = 0; i != size;) {
 			SlCopy(buf.data(), MAP_SL_BUF_SIZE, SLE_UINT8);
-			for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) _m[i++].m3 = buf[j];
+			for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) {
+				if (IsSavegameVersionBefore(SLV_FIVE_HUNDRED_COMPANIES) &&
+					GB(buf[j], 4, 4) == 0x0f) { // in case if the save doesn't have the MAP9 and MAPD, otherwise the values would be overwritten, hopefully
+					uint16 o = buf[j] + 0x210;
+					uint8 owner_add = ((o&0x3FF)>>5);
+					_me[i].m10 &= ~(0xFC);
+					_me[i].m10 |= (owner_add&0x1f)<<2;
+				}
+				_m[i++].m3 = buf[j];
+			}
 		}
 	}
 
@@ -312,7 +339,18 @@ struct MAP7ChunkHandler : ChunkHandler {
 
 		for (TileIndex i = 0; i != size;) {
 			SlCopy(buf.data(), MAP_SL_BUF_SIZE, SLE_UINT8);
-			for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) _me[i++].m7 = buf[j];
+			for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) {
+				if (IsSavegameVersionBefore(SLV_FIVE_HUNDRED_COMPANIES) &&
+					GB(buf[j], 0, 5) >= 0xf) {  // in case if the save doesn't have the MAP9 and MAPD, otherwise the values would be overwritten, hopefully
+					uint16 o = buf[j] + 0x200;
+					uint8 owner_add = ((o&0x3FF)>>5);
+					_me[i].m9 &= ~(0xe0);
+					_me[i].m9 |= (owner_add&0x1f)<<5;
+					_me[i].m10 &= ~(0x03);
+					_me[i].m10 |= (owner_add&0x1f)>>3;
+				}
+				_me[i++].m7 = buf[j];
+			}
 		}
 	}
 

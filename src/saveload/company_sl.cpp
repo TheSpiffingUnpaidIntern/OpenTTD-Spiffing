@@ -379,9 +379,11 @@ public:
 class SlCompanyLiveries : public DefaultSaveLoadHandler<SlCompanyLiveries, CompanyProperties> {
 public:
 	inline static const SaveLoad description[] = {
-		SLE_CONDVAR(Livery, in_use,  SLE_UINT8, SLV_34, SL_MAX_VERSION),
-		SLE_CONDVAR(Livery, colour1, SLE_UINT16, SLV_34, SL_MAX_VERSION),
-		SLE_CONDVAR(Livery, colour2, SLE_UINT16, SLV_34, SL_MAX_VERSION),
+		SLE_CONDVAR(Livery, in_use,  SLE_UINT8,                 SLV_34, SL_MAX_VERSION),
+		SLE_CONDVAR(Livery, colour1, SLE_FILE_U8 | SLE_VAR_U16, SLV_34, SLV_MAX_OG),
+		SLE_CONDVAR(Livery, colour1, SLE_UINT16,                SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
+		SLE_CONDVAR(Livery, colour2, SLE_FILE_U8 | SLE_VAR_U16, SLV_34, SLV_MAX_OG),
+		SLE_CONDVAR(Livery, colour2, SLE_UINT16,                SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	};
 	inline const static SaveLoadCompatTable compat_description = _company_liveries_compat;
 
@@ -459,7 +461,8 @@ static const SaveLoad _company_desc[] = {
 	SLE_CONDVAR(CompanyProperties, current_loan,          SLE_VAR_I64 | SLE_FILE_I32,  SL_MIN_VERSION, SLV_65),
 	SLE_CONDVAR(CompanyProperties, current_loan,          SLE_INT64,                   SLV_65, SL_MAX_VERSION),
 
-	    SLE_VAR(CompanyProperties, colour,                SLE_UINT16),
+	SLE_CONDVAR(CompanyProperties, colour,                SLE_FILE_U8 | SLE_VAR_U16,   SL_MIN_VERSION, SLV_MAX_OG),
+	SLE_CONDVAR(CompanyProperties, colour,                SLE_UINT16,                  SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	    SLE_VAR(CompanyProperties, money_fraction,        SLE_UINT8),
 	    SLE_VAR(CompanyProperties, block_preview,         SLE_UINT8),
 
@@ -470,13 +473,14 @@ static const SaveLoad _company_desc[] = {
 	SLE_CONDVAR(CompanyProperties, inaugurated_year,      SLE_FILE_U8  | SLE_VAR_I32,  SL_MIN_VERSION, SLV_31),
 	SLE_CONDVAR(CompanyProperties, inaugurated_year,      SLE_INT32,                   SLV_31, SL_MAX_VERSION),
 
-	    SLE_ARR(CompanyProperties, share_owners,          SLE_UINT8, 4),
+	SLE_CONDARR(CompanyProperties, share_owners,          SLE_UINT8, 4,                SL_MIN_VERSION, SLV_MAX_OG),
+	SLE_CONDARR(CompanyProperties, share_owners,          SLE_UINT8, 4,                SLV_FIVE_HUNDRED_COMPANIES, SLV_FIVE_HUNDRED_COMPANIES), // my bad, had to make it UINT16 back then, now too late
 
 	SLE_CONDVAR(CompanyProperties, num_valid_stat_ent,    SLE_UINT8,                   SL_MIN_VERSION, SLV_SAVELOAD_LIST_LENGTH),
 
 	    SLE_VAR(CompanyProperties, months_of_bankruptcy,  SLE_UINT8),
 	SLE_CONDVAR(CompanyProperties, bankrupt_asked.data[0],   SLE_FILE_U8  | SLE_VAR_U64,  SL_MIN_VERSION, SLV_104),
-	SLE_CONDVAR(CompanyProperties, bankrupt_asked.data[0],   SLE_FILE_U16 | SLE_VAR_U64,  SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	SLE_CONDVAR(CompanyProperties, bankrupt_asked.data[0],   SLE_FILE_U16 | SLE_VAR_U64,  SLV_104, SLV_MAX_OG),
 	SLE_CONDARR(CompanyProperties, bankrupt_asked.data,   SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	    SLE_VAR(CompanyProperties, bankrupt_timeout,      SLE_INT16),
 	SLE_CONDVAR(CompanyProperties, bankrupt_value,        SLE_VAR_I64 | SLE_FILE_I32,  SL_MIN_VERSION, SLV_65),

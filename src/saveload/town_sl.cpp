@@ -212,18 +212,18 @@ static const SaveLoad _town_desc[] = {
 	SLE_CONDSSTR(Town, name,                 SLE_STR | SLF_ALLOW_CONTROL, SLV_84, SL_MAX_VERSION),
 
 	    SLE_VAR(Town, flags,                 SLE_UINT8),
-	SLE_CONDVAR(Town, statues.data[0],          SLE_FILE_U8  | SLE_VAR_U64, SL_MIN_VERSION, SLV_104),
-	SLE_CONDVAR(Town, statues.data[0],          SLE_FILE_U16 | SLE_VAR_U64,     SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	SLE_CONDVAR(Town, statues.data[0],       SLE_FILE_U8  | SLE_VAR_U64, SL_MIN_VERSION, SLV_104),
+	SLE_CONDVAR(Town, statues.data[0],       SLE_FILE_U16 | SLE_VAR_U64,     SLV_104, SLV_MAX_OG),
 	SLE_CONDARR(Town, statues.data,          SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 
 	SLE_CONDVAR(Town, have_ratings.data[0],     SLE_FILE_U8  | SLE_VAR_U64, SL_MIN_VERSION, SLV_104),
-	SLE_CONDVAR(Town, have_ratings.data[0],     SLE_FILE_U16 | SLE_VAR_U64,               SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	SLE_CONDVAR(Town, have_ratings.data[0],     SLE_FILE_U16 | SLE_VAR_U64,               SLV_104, SLV_MAX_OG),
 	SLE_CONDARR(Town, have_ratings.data,     SLE_UINT64, CompanyMask::bsize, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	SLE_CONDARR(Town, ratings,               SLE_INT16, 8,               SL_MIN_VERSION, SLV_104),
-	SLE_CONDARR(Town, ratings,               SLE_INT16, MAX_COMPANIES, SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	SLE_CONDARR(Town, ratings,               SLE_INT16, MAX_COMPANIES, SLV_104, SLV_MAX_OG),
 	SLE_CONDARR(Town, ratings,               SLE_INT16, MAX_COMPANIES, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	SLE_CONDARR(Town, unwanted,              SLE_INT8,  8,               SLV_4, SLV_104),
-	SLE_CONDARR(Town, unwanted,              SLE_INT8,  OLD_MAX_COMPANIES, SLV_104, SLV_REPAIR_OBJECT_DOCKING_TILES),
+	SLE_CONDARR(Town, unwanted,              SLE_INT8,  OLD_MAX_COMPANIES, SLV_104, SLV_MAX_OG),
 	SLE_CONDARR(Town, unwanted,              SLE_INT8,  MAX_COMPANIES, SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 
 	SLE_CONDVAR(Town, supplied[CT_PASSENGERS].old_max, SLE_FILE_U16 | SLE_VAR_U32, SL_MIN_VERSION, SLV_9),
@@ -263,7 +263,8 @@ static const SaveLoad _town_desc[] = {
 	    SLE_VAR(Town, fund_buildings_months, SLE_UINT8),
 	    SLE_VAR(Town, road_build_months,     SLE_UINT8),
 
-	SLE_CONDVAR(Town, exclusivity,           SLE_UINT16,                  SLV_2, SL_MAX_VERSION),
+	SLE_CONDVAR(Town, exclusivity,           SLE_FILE_U8  | SLE_VAR_U16, SLV_2, SLV_MAX_OG),
+	SLE_CONDVAR(Town, exclusivity,           SLE_UINT16,                 SLV_FIVE_HUNDRED_COMPANIES, SL_MAX_VERSION),
 	SLE_CONDVAR(Town, exclusive_counter,     SLE_UINT8,                  SLV_2, SL_MAX_VERSION),
 
 	SLE_CONDVAR(Town, larger_town,           SLE_BOOL,                  SLV_56, SL_MAX_VERSION),
