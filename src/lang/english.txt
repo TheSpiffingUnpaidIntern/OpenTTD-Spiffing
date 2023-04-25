@@ -5639,6 +5639,6 @@ STR_NETWORK_ERROR_BATTLE_ROYALE                                 :{WHITE}Can not 
 STR_BATTLE_ROYALE_COUNTDOWN_CAPTION                             :{WHITE}Entering Battle Royale Mode
 STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE                             :{WHITE}Embrace yourself to a totally balanced battle in {NUM} second{P "" s}
 STR_BATTLE_ROYALE_COUNTDOWN_MESSAGE1                            :{WHITE}{RAW_STRING}
-STR_BATTLE_ROYALE_BUY_SHARE_BACK                                :{BLACK}Buy back 10% of shares share in your company
-STR_BATTLE_ROYALE_BUY_SHARE_BACK_TOOLTIP                        :{BLACK}Buy back 10% of shares in your company. Shift+Click shows estimated cost without purchasing any share
+STR_BATTLE_ROYALE_BUY_SHARE_BACK                                :{BLACK}Buy back 10% of the shares in your company
+STR_BATTLE_ROYALE_BUY_SHARE_BACK_TOOLTIP                        :{BLACK}Buy back 10% of the shares in your company. Shift+Click shows estimated cost without purchasing any share
 STR_COMPANY_VIEW_SHARES_COSTS                                   :{GOLD}Shares costs: {WHITE}{CURRENCY_LONG}
