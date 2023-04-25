@@ -2593,7 +2593,7 @@ DEF_CONSOLE_CMD(ConPrepareBattleRoyale)
 	// [economy]
 	IConsoleSetSetting("allow_shares", "true", true);
 	IConsoleSetSetting("give_money", "false", true);
-	IConsoleSetSetting("min_years_for_shares", "8", true);
+	IConsoleSetSetting("min_years_for_shares", "6", true);
 	IConsoleSetSetting("infrastructure_maintenance", "true", true);
 
 	// [network]
